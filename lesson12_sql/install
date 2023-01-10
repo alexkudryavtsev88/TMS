@@ -1,0 +1,27 @@
+УСТАНОВКА:
+
+Linux Ubuntu:
+
+ sudo apt update
+ sudo apt install sqlite3
+ sqlite3 --version
+
+Запуск:
+
+ sqlite3
+
+-----------------------
+
+WINDOWS:
+
+- Создать папку C:\sqlite.
+- Извлечь содержимое архивной папки sqlite3 в созданную папку
+- Зайти в терминал, перейти в директорию C:\sqlite:
+
+  cd c:\sqlite
+
+- затем:
+
+  sqlite3
+
+-----------------------
