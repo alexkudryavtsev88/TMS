@@ -3,7 +3,7 @@ CREATE TABLE users(
  id serial PRIMARY KEY,
  name VARCHAR(20) NOT NULL,
  age INTEGER NOT NULL,
- gender TEXT(6) NOT NULL,
+ gender VARCHAR(6) NOT NULL,
  nationality TEXT
 );
 
