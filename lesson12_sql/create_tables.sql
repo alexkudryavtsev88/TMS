@@ -1,7 +1,7 @@
 --users table:
 CREATE TABLE users(
- id INTEGER PRIMARY KEY AUTOINCREMENT,
- name TEXT(20) NOT NULL,
+ id serial PRIMARY KEY,
+ name VARCHAR(20) NOT NULL,
  age INTEGER NOT NULL,
  gender TEXT(6) NOT NULL,
  nationality TEXT
@@ -9,9 +9,9 @@ CREATE TABLE users(
 
 --posts table:
 CREATE TABLE posts(
- id INTEGER PRIMARY KEY AUTOINCREMENT,
- title TEXT(20) NOT NULL,
- description TEXT(100) NOT NULL,
+ id serial PRIMARY KEY,
+ title VARCHAR(20) NOT NULL,
+ description VARCHAR(100) NOT NULL,
  user_id INTEGER,
  FOREIGN KEY (user_id)
   REFERENCES users (id)
@@ -20,7 +20,7 @@ CREATE TABLE posts(
 
 --comments table:
 CREATE TABLE IF NOT EXISTS comments(
- id INTEGER PRIMARY KEY AUTOINCREMENT,
+ id serial PRIMARY KEY,
  title TEXT NOT NULL,
  user_id INTEGER,
  post_id INTEGER,
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS comments(
 
 --likes table:
 CREATE TABLE likes(
- id INTEGER PRIMARY KEY AUTOINCREMENT,
+ id serial PRIMARY KEY,
  user_id INTEGER,
  post_id INTEGER,
  FOREIGN KEY (user_id)
@@ -46,6 +46,6 @@ CREATE TABLE likes(
 );
 
 --Посмотреть структуру таблицы:
-.header on
-.mode column
-pragma table_info('comments');
+--.header on
+--.mode column
+--pragma table_info('comments');
