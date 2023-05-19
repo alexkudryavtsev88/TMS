@@ -7,8 +7,9 @@ if x == 10:
 else:
     print('2 case!')  # вторая "ветка": выполнится, если 1 условие – False
 
-# напечатает "1 case"
+print("*" * 30)
 
+# напечатает "1 case"
 
 if x < 10:
     print("1 case!")  # первая "ветка": выполнится, если 1 условие - True
@@ -17,7 +18,9 @@ elif x > 10:
 else:
     print("3 case!")  # вторая "ветка": выполнится, если условия 1 и 2 - False
 
-# напечатает"3 case" 
+# напечатает "3 case"
+
+print("*" * 30)
 
 """
 - Поток выполнения программы входит только в одну "ветку"
@@ -27,9 +30,15 @@ else:
 """
 
 if x <= 10:
-    print(x)
+    print(f'{x} <= 10!')
     if x == 10:
-        ...
+        print(f'{x} == 10!')
+    else:
+        print(f'{x} < 10!')
+else:
+    print(f"{x} > 10")
+
+print("*" * 30)
 
 """
 Логические операторы and, or, not
@@ -38,11 +47,9 @@ if x <= 10:
 
 Если хотя бы один из операндов выражения с and равен False, то результат всего выражения будет False"""
 
-x = True
-y = False
-z = False
+x, y, z = True, False, False
 
-print(x and y and z)
+print(f'AND result: {x and y and z}')
 # False
 
 """
@@ -50,7 +57,7 @@ print(x and y and z)
 
 Если хотя бы один из операндов выражения с or равен True, то результат всего выражения будет True"""
 
-print(x or y or z)
+print(f'OR result: {x or y or z}')
 # True
 
 """
@@ -58,8 +65,49 @@ print(x or y or z)
 
 оператор not инвертирует значение bool-типа, превращая False в True и наоборот"""
 
-print(not (x and y and z))
+print(f"NOT result: {not (x and y and z)}")
 # True
+
+print("*" * 30)
+
+
+def check_true_or_false(name1, age1, name2, age2):
+    print(f'{name1}, {age1}, {name2}, {age2}')
+    if (name1 and age1) or (name2 and age2):
+        print("SUCCESS!")
+    else:
+        print("FAILURE!")
+
+
+# TEST
+data = [
+    # all parameters exist
+    ('Alex', 30, 'John', 40),
+    # One of parameter doesn't exist
+    (None, 30, 'John', 40),
+    ('Alex', None, 'John', 40),
+    ('Alex', 30, None, 40),
+    ('Alex', 30, 'John', None),
+    # 2 parameters doesn't exist
+    (None, None, 'John', 40),
+    ('Alex', 30, None, None),
+    (None, 30, None, 40),
+    ('Alex', None, 'John', None),
+    (None, 30, 'John', None),
+    ('Alex', None, None, 40),
+    # 3 parameters doesn't exist
+    ('Alex', None, None, None),
+    (None, 30, None, None),
+    (None, None, 'John', None),
+    (None, None, None, 40),
+    (None, None, None, None),
+]
+
+for a, b, c, d in data:
+    check_true_or_false(a, b, c, d)
+
+print("*" * 30)
+
 
 """
 ЦИКЛЫ
@@ -72,26 +120,49 @@ my_list = [1, 2, 3, 4, 5]
 for element in my_list:
     print(element)
 
+print("*" * 30)
+
 # итерирование по счетчику, величина которого равна длине списка – 1,
 # и получение каждого элемента по индексу
 
 for x in range(len(my_list)):
     print(my_list[x])
 
-# если у нас есть два списка равной длины, и мы хотим, например, суммировать элементы обоих списков, стоящих на одинаковых позициях
-my_list2 = [10, 11, 12, 13, 14]
-for idx, element in enumerate(my_list):
-    print(element + my_list2[idx])
-# * функция enumerate создает пары индекс элемента – сам элемент
+print("*" * 30)
+
+# если у нас есть два списка РАВНОЙ ДЛИНЫ, и мы хотим, например,
+# суммировать элементы обоих списков, стоящих на одинаковых позициях
+list1 = [10, 20, 30, 40, 50]
+list2 = [100, 200, 300, 400, 500]
+for idx, list1_element in enumerate(my_list):
+    list2_element = list2[idx]
+    result = list1_element + list2_element
+    print(result)
+
+print("*" * 30)
+
+# * функция enumerate создает пары: (индекс элемента, сам элемент)
+# ПРИМЕЧАНИЕ: на самом деле функция enumerate возвращает на каждой итерации не сам индекс элемента,
+# а целое число, которое соответствует индексу текущего элемента, если функция enumerate
+# была вызвана БЕЗ дополнительного аргумента start (по умолчанию он равен 0)
 
 # for цикл c else
 my_list = [10, 11, 12, 13, 14]
 for i in my_list:
     print(i)
     if i == 15:
-        break
-else:   # else выполнится, если не был выполнен break внутри цикла
+        print("Break the loop!")
+        break   # оператор break немедленно прерывает ВЕСЬ ЦИКЛ
+        print("Hello after break!")  # эта строка кода НИКОГДА не будет выполнена
+    if i == 11:
+        print("Go to the next iteration!")
+        continue  # оператор coninue немедленно прерывает ТЕКУЩУЮ ИТЕРАЦИЮ ЦИКЛА
+        print("Hello after continue!")  # эта строка кода НИКОГДА не будет выполнена
+    print('Hello at the END of iteration!')  # если в цикле случился break, эта стока кода НЕ будет выполнена
+else:   # код внутри else выполнится, если в цикле не был выполнен break
     print("END")
+
+print("*" * 30)
 
 """
 2. Цикл while
