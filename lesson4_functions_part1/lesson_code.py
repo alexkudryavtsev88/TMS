@@ -1,25 +1,38 @@
-import asyncio
+GLOBAL_VAR = "TEST"
+GLOBAL_X = [1, 2, 3]
 
-is_requestor_global_admin, requested_relations, requested_user_info = await asyncio.gather(
-    ory_client.has_admin_access(requestor.id),
-    ory_client.get_relation_tuples(user_id),
-    ...
-)
-if not is_global_admin:
-    requestor_relations = await ory_client.get_relation_tuples(requestor.id)
-    requestor_roles = RolesProcessor.process_requestor_roles(requestor_relations)
-    roles = RolesProcessor.match_requested_and_requestor_roles(
-        requestor_roles=requestor_roles,
-        requested_roles=RolesProcessor.process_requested_roles(requested_relations)
-    )
-    if not requestor_roles.user_policy or requestor_roles.user_policy == PartnerAccessPolicy.EXTERNAL_USER:
-        requestor_policy = "external_user"
-        response_user_type = ExternalUser.from_user_info()
-    else:
-        response_requestor_policy = "internal_user"
-        response_user_type = InternalUser.from_user_info()
+from typing import Callable
 
-else:
-    roles = RolesProcessor.process_requested_roles(requested_relations)
-    response_requestor_policy = "internal_user"
-    response_user_type = InternalUser()
+
+def test1(x, y, z):
+    print(x, y, z)
+
+def test2():
+    print(x)
+    print("hello")
+
+
+def test3(x, y):
+    print(x, y, sep=', ')
+
+def work_func(a):
+    print(a)
+    b = 500
+    print(b)
+    def inner(c):
+        nonlocal b
+        b += 100
+        print(b)
+        print(c)
+    inner(b)
+    print(b)
+
+def work_func2(fn: Callable[[int, int], None], a: int, b: int):
+    print(a, b)
+    fn(a, b)
+    return test1
+
+result = work_func2(test3, 100, 200)
+result(22, 33, 44)
+
+
