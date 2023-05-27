@@ -3,7 +3,20 @@
 и возвращает максимальное число в списке
 """
 
-def recursive_max(some_list, deep=-1):
+
+""" Task 2: recursive max element """
+def recursive_max(some_list):
+    if len(some_list) == 1:
+        return some_list[0]
+
+    max_element = recursive_max(some_list[1:])
+    if some_list[0] < max_element:
+        return max_element
+    else:
+        return some_list[0]
+
+
+def recursive_max_with_analysis(some_list, deep=-1):
     deep += 1
     rshift = '\t' * deep
     print(f"{rshift} Текущая глубина рекурсии: {deep}")
@@ -12,7 +25,7 @@ def recursive_max(some_list, deep=-1):
         print(f"{rshift} В списке {some_list} остался ровно 1 элемент: возвращаем элемент {some_list[0]}")
         return some_list[0]  # значит просто возвращаем единственный элемент этого списка
 
-    max_element = recursive_max(some_list[1:], deep=deep) # рекурсивно вызываем функцию с аргументом
+    max_element = recursive_max_with_analysis(some_list[1:], deep=deep)  # рекурсивно вызываем функцию с аргументом
     print(f"{rshift} Текущая глубине рекурсии {deep}, MAX элемент равен {max_element}")
     # количество рекурсивных вызовов будет равно (Длина списка - 1)
     # каждый рекурсивный вызов будет возвращать 1 элемент списка

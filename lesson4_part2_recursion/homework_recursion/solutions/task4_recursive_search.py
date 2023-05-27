@@ -1,5 +1,5 @@
 """
-1. Дан входной словарь
+Дан входной словарь
 - Ключи словаря - строки
 - Значениями ключей могут быть:
 -- Строки
@@ -24,36 +24,27 @@
 * понятие "уровень вложенности" или "глубина" касается только вложенных словарей!
 """
 
+from homework_recursion.source.source_dict import get_source_dict_with_duplicates
 
-""" Пример словаря: """
-source_dict = {
-    "key1": {
-        "key2": {
-            "key3": [
-                "John",
-                {
-                    "key4": "Bob",
-                    "key5": "Alex",
-                    "key6": {
-                        "key7": [
-                            {
-                                "key7": "Jessica",
-                                "key8": {
-                                    "key9": [
-                                        "Alex"
-                                    ]
-                                }
-                            }
-                        ]
-                    }
-                }
-            ]
-        }
-    },
-    "key4": "Kate"
-}
 
-""" Результат работы функции: поиск слова 'Alex': """
-recursive_search(source_dict, 'Alex')
-# Found "Alex" on deep = 3, parent = key5
-# Found "Alex" on deep = 6, parent = key9
+"""Task 4: recursive search in dict"""
+def recursive_search(src: dict, value: str, deep=-1, parent=None):
+    if isinstance(src, dict):
+        deep += 1
+        for k, v in src.items():
+            recursive_search(v, value, deep=deep, parent=k)
+    elif isinstance(src, list):
+        for item in src:
+            recursive_search(item, value, deep=deep, parent=parent)
+    elif isinstance(src, str):
+        if src == value:
+            print(f'Found "{value}" on deep = {deep}, parent = {parent}')
+            return src
+
+
+""" TEST """
+lookup_name = "Alex"
+source_dict = get_source_dict_with_duplicates()
+recursive_search(source_dict, lookup_name)
+
+

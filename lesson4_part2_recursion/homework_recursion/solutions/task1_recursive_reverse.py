@@ -4,6 +4,7 @@
 """
 
 
+""" Task 1: recursive reverse """
 def recursive_reverse(some_list):
     if not some_list:  # терминальный кейс: список пустой, значит возвращаем пустой список.
         return []
