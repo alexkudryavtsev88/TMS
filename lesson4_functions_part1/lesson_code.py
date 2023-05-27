@@ -15,17 +15,6 @@ def test2():
 def test3(x, y):
     print(x, y, sep=', ')
 
-def work_func(a):
-    print(a)
-    b = 500
-    print(b)
-    def inner(c):
-        nonlocal b
-        b += 100
-        print(b)
-        print(c)
-    inner(b)
-    print(b)
 
 def work_func2(fn: Callable[[int, int], None], a: int, b: int):
     print(a, b)
