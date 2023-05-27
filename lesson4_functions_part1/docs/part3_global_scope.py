@@ -55,9 +55,6 @@ def print_globals():
 
 print_globals()
 
-my_global_vars = globals()
-for name, value in my_global_vars.items():
-    print(f"name: {name} -> value: {value}")
 
 # Примечание: если вынести код из функции print_globals() на уровень модуля: то он не сработает!
 # 1. Переменная my_global_vars будет являться Глобальной и одновременно хранить ссылку
@@ -65,4 +62,3 @@ for name, value in my_global_vars.items():
 # 2. Временные переменные name и value - тоже будут глобальными переменными.
 # Но так как они меняют свои значения по ходу цикла, то мы получим ошибку:
 #   RuntimeError: dictionary changed size during iteration
-
