@@ -27,15 +27,7 @@ def factorial_recursive(N: int, frame_num: int = 0, tab: int = -1):
         return N * result
 
 
-def factorial_recursive_simple(N: int, frame_num: int = 0, tab: int = -1):
-    if N <= 1:
-        return 1
-    else:
-        result = factorial_recursive_simple(N=N-1, frame_num=frame_num, tab=tab)
-        return N * result
 
-
-n = 5
+n = 20
 factorial_n = factorial_recursive(n)
 print(f"\nФакториал числа 5 = {factorial_n}")
-assert factorial_n == factorial_recursive_simple(n)

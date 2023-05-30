@@ -4,11 +4,12 @@ from collections import Counter
 
 def count_elements(collection: Collection):
     duplicates = {}
+
     for item in collection:
-        if item in duplicates:
-            duplicates[item] += 1
-        else:
+        if item not in duplicates:
             duplicates[item] = 1
+        else:
+            duplicates[item] += 1
 
     return dict(sorted(duplicates.items(), key=lambda x: x[1], reverse=True))
 
