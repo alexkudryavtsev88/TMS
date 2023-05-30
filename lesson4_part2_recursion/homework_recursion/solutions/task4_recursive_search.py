@@ -26,7 +26,6 @@
 
 from homework_recursion.source.source_dict import get_source_dict_with_duplicates
 
-
 """Task 4: recursive search in dict"""
 def recursive_search(src: dict, value: str, deep=-1, parent=None):
     if isinstance(src, dict):
