@@ -29,7 +29,7 @@ def get_source_dict():
 
 """ Пример словаря c дубликатами: """
 def get_source_dict_with_duplicates():
-    source_dict = {
+    return {
         "key1": {
             "key2": {
                 "key3": [
@@ -55,4 +55,3 @@ def get_source_dict_with_duplicates():
         },
         "key4": "Kate"
     }
-    return source_dict
