@@ -2,7 +2,7 @@ from typing import Collection
 from collections import Counter
 
 
-def count_elements(collection):
+def count_elements(collection: Collection):
     duplicates = {}
     for item in collection:
         if item in duplicates:
