@@ -29,36 +29,3 @@ def get_source_dict():
         "key13": "Ronaldo"  # deep 0
     }
 
-
-# def get_source_dict_with_duplicates():
-#     return {
-#         "key1": {
-#             "key2": {
-#                 "key3": [
-#                     "John",
-#                     {
-#                         "key4": "Bob",
-#                         "key5": "Alex",
-#                         "key6": {
-#                             "key7": [
-#                                 {
-#                                     "key8": "Jessica",
-#                                     "key9": {
-#                                         "key10": [
-#                                             "Alex"
-#                                         ]
-#                                     }
-#                                 },
-#                                 "Louisa",
-#                                 {
-#                                     "key11": "Hans"
-#                                 }
-#                             ]
-#                         }
-#                     },
-#                     "Brad"
-#                 ]
-#             }
-#         },
-#         "key12": "Kate"
-#     }
