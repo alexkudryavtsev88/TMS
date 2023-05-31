@@ -29,7 +29,7 @@ def get_source_dict():
     return {
         "key1": "John",  # deep 0
         'key2': {
-            'key3': 'Alex',  # deep 1
+            'key3': 'Ann',  # deep 1
             'key4': {
                 'key5': ['Kate', 'Mary'],  # deep 2
                 'key6': {
@@ -41,46 +41,43 @@ def get_source_dict():
                                 'key9': [  # deep 5
                                     'Lisa',
                                     {
-                                        'key10': ['Mark']  # deep 6
+                                        'key10': ['Mark', 'Alex']  # deep 6
                                     }
-                                ]
+                                ],
+                                "key11": "Louisa",  # deep 5
                             }
-                        }
+                        },
+                        "Alex",  # deep 3
                     ]
                 },
             },
-            'key8': 'Robert'  # deep 1
-        }
-    }
-
-
-""" Пример словаря c дубликатами: """
-
-
-def get_source_dict_with_duplicates():
-    return {
-        "key1": {
-            "key2": {
-                "key3": [
-                    "John",
-                    {
-                        "key4": "Bob",
-                        "key5": "Alex",
-                        "key6": {
-                            "key7": [
-                                {
-                                    "key7": "Jessica",
-                                    "key8": {
-                                        "key9": [
-                                            "Alex"
-                                        ]
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                ]
-            }
+            'key12': 'Robert'  # deep 1
         },
-        "key4": "Kate"
+        "key13": "Ronaldo"  # deep 0
     }
+
+
+def recursive_search():  # функция должна принимать указанные по заданию аргументы
+    pass  # реализация алгоритма
+
+
+# TEST
+_dict = get_source_dict()
+values = [
+    ("John", {'val': 'John', 'parent': 'key1', 'deep': 0}),
+    ("Ann", {'val': 'Ann', 'parent': 'key3', 'deep': 1}),
+    ('Kate', {'val': 'Kate', 'parent': 'key5', 'deep': 2}),
+    ('Mary', {'val': 'Mary', 'parent': 'key5', 'deep': 2}),
+    ('Bob', {'val': 'Bob', 'parent': 'key7', 'deep': 3}),
+    ('Duke', {'val': 'Duke', 'parent': 'key7', 'deep': 3}),
+    ('Lisa', {'val': 'Lisa', 'parent': 'key9', 'deep': 5}),
+    ("Mark", {'val': 'Mark', 'parent': 'key10', 'deep': 6}),
+    ("Alex", {'val': 'Alex', 'parent': 'key10', 'deep': 6}),  # have Duplicate!
+    ('Louisa', {'val': 'Louisa', 'parent': 'key11', 'deep': 5}),
+    ('Robert', {'val': 'Robert', 'parent': 'key12', 'deep': 1}),
+    ('Ronaldo', {'val': 'Ronaldo', 'parent': 'key13', 'deep': 0})
+]
+for lookup_value, expected_result in values:
+    result = recursive_search(_dict, lookup_value)
+    print(result)
+    assert result == expected_result, f"{result} != {expected_result}"
