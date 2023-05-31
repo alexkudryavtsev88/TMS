@@ -7,7 +7,9 @@
 def recursive_simple(src: dict, lookup_value: str):
     for key, current_value in src.items():
         if isinstance(current_value, dict):
-            return recursive_simple(current_value, lookup_value)
+            value = recursive_simple(current_value, lookup_value)
+            if value:
+                return value
             # функция вызывает сама себя, используя в качестве аргумента
             # 'src' переменную v, которая имеет тип dict
         else:
@@ -26,11 +28,16 @@ source_dict = {
                     'key8': 'Robert'
                 }
             },
+            'key7': 'John'
         },
-    }
+        'key8': 'Karl'
+    },
+    'key9': 'Kate'
 }
-print(recursive_simple(source_dict, 'Alex'))  # напечатает 'Alex is found!'
-print(recursive_simple(source_dict, 'Bob'))   # напечатает 'Alex is found!'
-print(recursive_simple(source_dict, 'Jessica'))  # напечатает None, так как слова 'Jessica' нет ни на одном уровне вложенности
+print(recursive_simple(source_dict, 'Alex'))
+print(recursive_simple(source_dict, 'Bob'))
+print(recursive_simple(source_dict, 'John'))
+print(recursive_simple(source_dict, 'Karl'))
+print(recursive_simple(source_dict, 'Kate'))
 
 

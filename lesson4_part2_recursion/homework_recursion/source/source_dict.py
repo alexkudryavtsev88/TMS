@@ -18,7 +18,8 @@ def get_source_dict():
                                     }
                                 ]
                             }
-                        }
+                        },
+                        'Luisa',
                     ]
                 },
             },
@@ -40,18 +41,23 @@ def get_source_dict_with_duplicates():
                         "key6": {
                             "key7": [
                                 {
-                                    "key7": "Jessica",
-                                    "key8": {
-                                        "key9": [
+                                    "key8": "Jessica",
+                                    "key9": {
+                                        "key10": [
                                             "Alex"
                                         ]
                                     }
+                                },
+                                "Louisa",
+                                {
+                                    "key11": "Hans"
                                 }
                             ]
                         }
-                    }
+                    },
+                    "Brad"
                 ]
             }
         },
-        "key4": "Kate"
+        "key12": "Kate"
     }

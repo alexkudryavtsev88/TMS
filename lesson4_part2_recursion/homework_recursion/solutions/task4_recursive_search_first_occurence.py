@@ -27,7 +27,7 @@ def recursive_search_fist_match(src: dict, value: str, deep=-1, parent=None):
                 if result:
                     return result
         elif isinstance(src, str) and src == value:
-            print(f'Found "{value}" on deep = {deep}, parent = {parent}')
+            # print(f'Found "{value}" on deep = {deep}, parent = {parent}')
             return {'val': value, 'parent': parent, 'deep': deep}
 
     return _recursive_inner(src, value, deep, parent)
@@ -36,23 +36,28 @@ def recursive_search_fist_match(src: dict, value: str, deep=-1, parent=None):
 """ TEST """
 
 """1. Find the first occurrence of lookup_name"""
-lookup_name = "Alex"
+# lookup_name = "Alex"
 _dict = source_dict.get_source_dict_with_duplicates()
-value = recursive_search_fist_match(_dict, lookup_name)
-print(value)
-assert value == {'val': 'Alex', 'parent': 'key5', 'deep': 3}
+
+# value = recursive_search_fist_match(_dict, lookup_name)
+# print(value)
+# assert value == {'val': 'Alex', 'parent': 'key5', 'deep': 3}
 
 
 """2. Find all expected names"""
-_dict = source_dict.get_source_dict()
+# _dict = source_dict.get_source_dict()
 values = [
-    ("Alex", {'val': 'Alex', 'parent': 'key3', 'deep': 1}),
-    ("Mary", {'val': 'Mary', 'parent': 'key5', 'deep': 2}),
-    ('Duke', {'val': 'Duke', 'parent': 'key7', 'deep': 3}),
-    ('Mark', {'val': 'Mark', 'parent': 'key10', 'deep': 6})
-]
+    ("Alex", {'val': 'Alex', 'parent': 'key5', 'deep': 3}),
+    ("John", {'val': 'John', 'parent': 'key3', 'deep': 2}),
+    ("Brad", {'val': 'Brad', 'parent': 'key3', 'deep': 2}),
+    ('Kate', {'val': 'Kate', 'parent': 'key12', 'deep': 0}),
+    ('Hans', {'val': 'Hans', 'parent': 'key11', 'deep': 5}),
+    ('Louisa', {'val': 'Louisa', 'parent': 'key7', 'deep': 4}),
 
+]
+#
 for lookup_value, expected_result in values:
     result = recursive_search_fist_match(_dict, lookup_value)
     print(result)
     assert result == expected_result, f"{result} != {expected_result}"
+
