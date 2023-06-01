@@ -67,7 +67,6 @@ result_json = my_func_decorated()
 print(type(result_json))
 print(result_json)
 
-
 """
 Декоратор to_json позволяет преобразовать результат выполнения функции (словарь) в JSON-объект
 """
@@ -86,6 +85,7 @@ def create_json_from_dict(lst):
 чтобы он мог принимать параметр sort_keys = True/False, и в зависимости
 от это параметра применять сортировку по ключам в JSON или не применять
 """
+
 def to_json_with_keys_sorting(sort_keys):
     def wrapper(func):
         def inner(*args, **kwargs):
