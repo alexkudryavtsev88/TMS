@@ -22,7 +22,7 @@ def recursive_search(source: dict, lookup_value: str, deep=-1, parent=None):
                     val, lookup, deep_, key
                 ):
                     return result
-        elif isinstance(src, list):
+        elif isinstance(src, (list, tuple, set)):
             for item in src:
                 if result := _recursive_inner(
                     item, lookup, deep_, parent_
