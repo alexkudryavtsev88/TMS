@@ -1,3 +1,4 @@
+import typing
 """
 LAMBDA-функции
 
@@ -15,7 +16,7 @@ anonymous_function(3)
 
 1. Функция Map
 
-- принимает первым аргументом фунцию
+- принимает первым аргументом функцию
 - принимает вторым аргументом итерируемый объект (например список элементов), итерируемых объектов может быть 1 и более
 - применяет указанную в функцию к каждому элементу итерируемого объекта/объектов
 - возвращает специальный объект "map object", который представляет собой итератор 
@@ -23,8 +24,23 @@ anonymous_function(3)
   чтобы получить конкретную коллецкию элементов
 """
 
-map_result = map(str.upper, ["x", "y", "z"])  # преобразует все строки из итерируемого объекта в верхний регистр
+def gen():
+    for i in range(1, 5):
+        yield i
+
+gen_ = gen()
+print(isinstance(gen_, typing.Iterable))
+print(isinstance(gen_, typing.Iterator))
+print(isinstance(gen_, typing.Generator))
+print(isinstance(iter([1, 2, 3]), typing.Generator))
+
+map_result = map(lambda x: x + '!', ['x', 'y', 'z'])  # преобразует все строки из итерируемого объекта в верхний регистр
+print(map_result)
 first = next(map_result)    # возвращает самый первый элемент из получанного итератора: "X"
+print(first)
+print("-----")
+for i in map_result:
+    print(i)
 
 """
 Чтобы получить из "map object" конкретную коллекцию элементов, нужно явное преобразование 
@@ -49,16 +65,16 @@ def is_odd_or_even(a: int) -> bool:
     return False
 
 
-map_result = map(lambda x: is_odd_or_even(x), [1, 2, 3, 4, 5])
-list(map_result)  # [False, True, False, True, False]
+map_result = map(is_odd_or_even, [1, 2, 3, 4, 5])
+print(list(map_result))  # [False, True, False, True, False]
 
 """
 - итерируемых объектов может быть от 1 до бесконечности: 
   в случае множества объектов, они передаются в функцию map как позиционные аргументы, через запятую,
   а переменные, ссылающиеся на их элементы указываются в lambda-выражении (соответственно)
 """
-map_result = map(lambda x, y, z: x + y + z, [1, 2, 3], [1, 2, 3])  # где x - элемент 1-го списка, y - элемент второго списка
-list(map_result)  # [2, 4, 6]
+map_result = map(lambda x, y, z: x + y + z, [1, 2, 3], [1, 2, 3], [1, 2, 3])  # где x - элемент 1-го списка, y - элемент второго списка
+print(list(map_result))  # [3, 6, 9]
 
 """ПРИМЕЧАНИЕ:
 
@@ -101,12 +117,34 @@ list(filter_result)  # [1, 2, 3, 4, 5]
 """
 from functools import reduce
 
-reduce(lambda x, y: x + y, [1, 2, 3, 4, 5])  # эквивалентно: ((((1+2)+3)+4)+5) = 15
+reduce_result = reduce(lambda x, y: x + y, [1, 2, 3, 4, 5])  # эквивалентно: ((((1+2)+3)+4)+5) = 15
+print(reduce_result)
 
 # так как итерируемый объект пустой, то вернется начальное значение: 10
-reduce(lambda x, y: x + y, [], 10)
+print(reduce(lambda x, y: x - y, [], 10))
 
 # начальное значение будет подставлено перед первым элементом
 # итерируемого объекта, в данном примере, число 10 будет прибавлено к результату ((((1+2)+3)+4)+5)
 reduce(lambda x, y: x + y, [1, 2, 3, 4, 5], 10)
+
+class MyClass:
+    def __init__(self, name):
+        self.name = name
+
+    def __add__(self, other):
+        return self.__class__(
+            name=f"{self.name}{other.name}"
+        )
+
+
+my_name1 = MyClass("Alex")
+my_name2 = MyClass("Ann")
+new_object = my_name1 + my_name2
+print(new_object.name)
+
+new_list = [1, 2, 3] * 2
+print(new_list)
+
+
+
 

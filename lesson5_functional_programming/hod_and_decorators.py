@@ -23,9 +23,49 @@ def to_json(func):
     def wrapped(*args, **kwargs):
         result = func(*args, **kwargs)
         if not isinstance(result, dict):
-            raise TypeError(f'Instance should be a dict, got {type(result)}')
+            raise TypeError(
+                f'Instance should be a dict, got {type(result)}'
+            )
         return json.dumps(result)
     return wrapped
+
+@to_json
+def return_json_dict():
+    return {
+       "glossary": {
+          "title": "example glossary",
+          "GlossDiv": {
+             "title":"S",
+             "GlossList":{
+                "GlossEntry":{
+                   "ID":"SGML",
+                   "SortAs":"SGML",
+                   "GlossTerm":"Standard Generalized Markup Language",
+                   "Acronym":"SGML",
+                   "Abbrev":"ISO 8879:1986",
+                   "GlossDef":{
+                      "para":"A meta-markup language, used to create markup languages such as DocBook.",
+                      "GlossSeeAlso":[
+                         "GML",
+                         "XML"
+                      ]
+                   },
+                   "GlossSee": "markup"
+                }
+             }
+          }
+       }
+    }
+
+
+my_func = return_json_dict  # function object!
+result_dict = my_func()
+print(type(result_dict))
+print(result_dict)
+my_func_decorated = to_json(my_func)
+result_json = my_func_decorated()
+print(type(result_json))
+print(result_json)
 
 
 """
