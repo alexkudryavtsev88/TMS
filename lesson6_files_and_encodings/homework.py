@@ -1,6 +1,32 @@
 import json
 import csv
 import openpyxl
+from pathlib import Path
+from frozendict import frozendict
+
+
+def get_data_files():
+    root = Path(__file__).parent
+    mapping = {}
+
+    for path in root.joinpath("files").glob("homework_task*"):
+        name = path.name
+        if name.endswith("txt"):
+            key = "txt"
+        elif name.endswith("json"):
+            key = "json"
+        elif name.endswith("csv"):
+            key = "csv"
+        else:
+            raise ValueError(f"Unknown file extension: {name}")
+
+        mapping[key] = path.absolute().as_posix()
+
+    return frozendict(mapping)
+
+
+FILES_PATHS_MAP = get_data_files()
+print(FILES_PATHS_MAP)
 
 
 """ 1 """
@@ -15,18 +41,19 @@ latin1_encoded_string = latin1_byte_string.decode(encoding='latin1')
 print(latin1_encoded_string)
 
 """ 2 """
-# file_path = 'homework_task2.txt'
-# input_words = input('Введите 4 слова через пробел: ')
-# a, b, c, d = input_words.split()
-#
-#
-# with open(file_path, 'w', encoding='utf-8') as write_file:
-#     for word in a, b:
-#         write_file.write(word + '\n')
-#
-# with open(file_path, 'a', encoding='utf-8') as edit_file:
-#     for word in c, d:
-#         edit_file.write(word + '\n')
+file_path = FILES_PATHS_MAP['txt']
+input_words = input('Введите 4 слова через пробел: ')
+a, b, c, d = input_words.split()
+
+
+with open(file_path, 'w', encoding='utf-8') as write_file:
+    for word in a, b:
+        write_file.write(word + '\n')
+
+with open(file_path, 'a', encoding='utf-8') as edit_file:
+    for word in c, d:
+        edit_file.write(word + '\n')
+
 
 """ 3 """
 dict_ = {
@@ -43,7 +70,8 @@ def write_dict_to_json(file_name, some_dict):
     with open(file_name, 'w', encoding='utf-8') as json_file:
         json.dump(some_dict, json_file, indent=4)
 
-# write_dict_to_json('homework_task3.json', dict_)
+
+write_dict_to_json(FILES_PATHS_MAP["json"], dict_)
 
 
 """ 4 """
@@ -67,8 +95,8 @@ def write_json_to_csv(file_name, json_data: dict):
             )
 
 
-json_ = load_json('files/homework_task3.json')
-write_json_to_csv('files/homework_task4.csv', json_data=json_)
+json_ = load_json(FILES_PATHS_MAP["json"])
+write_json_to_csv(FILES_PATHS_MAP["csv"], json_data=json_)
 
 """ 5 """
 
@@ -89,19 +117,12 @@ def from_csv_to_excel(csv_f_name, excel_f_name):
         for lines in persons_columns, ids_list, names_list, phones_list:
             sheet.append(lines)
 
-        # row_names = list(filter(lambda n: n != 'age', next(file_reader)))
-        # for i, name in enumerate(row_names, start=start_index):
-        #     sheet.cell(row=i, column=1).value = name
-        #
-        # for idx, (id_, name, _, phone) in enumerate(file_reader, start=start_index):
-        #     sheet.cell(row=1, column=idx).value = f'Person{idx - 1}'
-        #
-        #     for row_num, item in enumerate((id_, name, phone), start=start_index):
-        #         sheet.cell(row=row_num, column=idx).value = item
-
     wb.save(excel_f_name)
 
 
-from_csv_to_excel(csv_f_name='homework_task4.csv', excel_f_name='homework_task112.xlsx')
+from_csv_to_excel(
+    csv_f_name=FILES_PATHS_MAP['csv'],
+    excel_f_name='homework_task112.xlsx'
+)
 
 
