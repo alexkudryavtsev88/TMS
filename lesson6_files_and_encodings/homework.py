@@ -38,17 +38,22 @@ dict_ = {
     111116: ('George', 20)
 }
 
+
 def write_dict_to_json(file_name, some_dict):
     with open(file_name, 'w', encoding='utf-8') as json_file:
         json.dump(some_dict, json_file, indent=4)
 
 # write_dict_to_json('homework_task3.json', dict_)
 
+
 """ 4 """
+
+
 def load_json(file_name):
     with open(file_name, 'r', encoding='utf-8') as read_file:
         json_dict = json.load(read_file)
         return json_dict
+
 
 def write_json_to_csv(file_name, json_data: dict):
     with open(file_name, 'w', encoding='utf-8') as csv_file:
@@ -61,10 +66,13 @@ def write_json_to_csv(file_name, json_data: dict):
                 [id_, name, age, phone]
             )
 
+
 json_ = load_json('files/homework_task3.json')
 write_json_to_csv('files/homework_task4.csv', json_data=json_)
 
 """ 5 """
+
+
 def from_csv_to_excel(csv_f_name, excel_f_name):
     wb = openpyxl.Workbook()
     sheet = wb.active
@@ -80,7 +88,6 @@ def from_csv_to_excel(csv_f_name, excel_f_name):
         persons_columns.insert(0, '')
         for lines in persons_columns, ids_list, names_list, phones_list:
             sheet.append(lines)
-
 
         # row_names = list(filter(lambda n: n != 'age', next(file_reader)))
         # for i, name in enumerate(row_names, start=start_index):
