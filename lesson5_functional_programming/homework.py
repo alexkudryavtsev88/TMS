@@ -58,8 +58,39 @@ def some_func(value: int):
     return value
 
 
-val = int(input("Enter the integer number:\n"))
-print(f"Result of 'some_func' with value {val}: {some_func(val)}")
+# val = int(input("Enter the integer number:\n"))
+# print(f"Result of 'some_func' with value {val}: {some_func(val)}")
+
+
+""" 5 """
+
+
+def analyze_string(string_value: str):
+    message_parts = []
+    try:
+        num = float(string_value)
+        message_parts.extend(
+            (
+                "положительное" if num >= 0 else "отрицательное",
+                f"целое число: {int(num)}" if num.is_integer() else f"дробное число: {num}"
+            )
+
+        )
+    except ValueError:
+        message_parts.append(f"некорректное число: {string_value}")
+
+    return "Вы ввели " + " ".join(message_parts)
+
+
+for str_value in (
+    "0",
+    "1",
+    "6.77",
+    "-5",
+    "-2.43",
+    "123a",
+):
+    print(analyze_string(str_value))
 
 
 
