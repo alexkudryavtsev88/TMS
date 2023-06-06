@@ -1,18 +1,20 @@
 """ 1 """
 import time
 
-my_func = lambda x: "even" if x % 2 == 0 else "odd"
 source = range(11)
+
 result = dict(
     zip(
         source,
-        list(map(lambda x: my_func(x), source))
+        list(
+            map(lambda x: "even" if x % 2 == 0 else "odd", source)
+        )
     )
 )
 print(result)
 
 """ 2 """
-result = list(map(lambda x: str(x), range(11)))
+result = list(map(lambda x: str(x), source))
 print(result)
 
 """ 3 """
@@ -59,7 +61,8 @@ def some_func(value: int):
 
 
 # val = int(input("Enter the integer number:\n"))
-# print(f"Result of 'some_func' with value {val}: {some_func(val)}")
+val = 5
+print(f"Result of 'some_func' with value {val}: {some_func(val)}")
 
 
 """ 5 """
