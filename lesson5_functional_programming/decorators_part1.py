@@ -62,8 +62,7 @@ my_func = return_json_dict  # function object!
 result_dict = my_func()
 print(type(result_dict))
 print(result_dict)
-my_func_decorated = to_json(my_func)
-result_json = my_func_decorated()
+result_json = to_json(my_func)()
 print(type(result_json))
 print(result_json)
 
@@ -125,7 +124,3 @@ assert all(
 )
 print(f'Json with unsorted keys:    {json_from_dict_unsorted_keys}')
 print(f'Json with sorted keys:      {json_from_dict_sorted_keys}')
-
-
-# Другой способ декорирования:
-
