@@ -15,9 +15,9 @@ assert emoji_decoded_utf == emoji
 
 # work with Path
 current_path = Path(__file__)  # get path to current file
-current_dir = current_path.parent
+current_dir = current_path.parent  # get path to current file's dir
 print(current_dir)
-current_file_name = current_path.stem
+current_file_name = current_path.stem  # file name without extension
 print(current_file_name)
 
 # find ALL python files in user space
