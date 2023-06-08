@@ -23,13 +23,18 @@ class Quadrangle(Triangle):
         -- 4-ю переменную сетаем обыкновенным образом через
            self.variable = variable
         """
-        super(Quadrangle, self).__init__(a, b, c)
+        super().__init__(a, b, c)
         self.d = d
 
     def perimeter(self):
         return self.a + self.b + self.c + self.d
 
+
 # ------------------------------------------------
+tr = Triangle(1, 2, 3)
+print(tr.perimeter())
+q = Quadrangle(1, 2, 3, 4)
+print(q.perimeter())
 
 """
 __new__() overriding: Singleton pattern example
@@ -88,10 +93,8 @@ class MyClass:
         """
         print("Hello")
 
-
     def print_name(self):
         print(self.NAME)
-
 
 
 MyClass.set_name("Alex")       # вызов classmethod от имени КЛАССА, до создания Экземпляра
