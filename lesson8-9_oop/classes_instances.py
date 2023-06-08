@@ -30,7 +30,9 @@ class MyClass:
 
 my_class = MyClass  # reference to the MyClass object
 print(type(my_class))  # Class object has type 'type' :)
-my_instance = MyClass(url="https://amazon.com")  # my_instance is the Instance of the class MyClass
+
+# creating Instance of the MyClass (__init__ method is called underlying)
+my_instance = MyClass(url="https://amazon.com")
 print(type(my_instance))  # Instance has type by the name of its Class
 
 # Attributes access
@@ -50,3 +52,15 @@ print(my_instance.some)  # will print the Class 'some' because the Instance 'som
 
 my_instance.new_attr = "New attribute"  # Also it's possible to set NEW attribute to the Instance
 print(my_instance.new_attr)
+
+# Methods
+my_instance.some_method()  # call of method belongs to the Instance (cannot call it from the Class!)
+# 'self' (first argument of the method) should NOT be specified explicitly when we call the method!
+# It's needed just for identifying that the method is bound to the Instance of the Class
+
+# Instances and Classes in Memory
+x = MyClass(url="test")
+y = MyClass(url="test")
+z = MyClass(url="test")
+assert id(x) != id(y) != id(z)
+
