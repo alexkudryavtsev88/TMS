@@ -4,6 +4,7 @@ This is Class - a layer of Abstraction, which provides a possibility to create o
 ('Class' and 'Type' are synonyms in Python)
 """
 
+
 class MyClass:
 
     """
@@ -42,7 +43,7 @@ print(my_class.some)  # read the class attribute
 print(my_instance.url)  # read the instance attribute
 print(my_instance.some)  # read the instance attribute
 
-my_class.some = "another some Class value"
+my_class.some = "another some Class value"        # update the Class existing attribute value
 my_instance.some = "another some Instance value"  # update the Instance existing attribute value
 print(my_class.some)
 print(my_instance.some)
