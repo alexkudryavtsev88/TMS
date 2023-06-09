@@ -43,21 +43,22 @@ class MyNewClass:
     def set_name(cls, name: str):
         """
         classmethod:
-        - принимает первым аргументом cls - это ссылка на текущий КЛАСС (не Объект!)
-        - внутри classmethod мы можем производить манипуляции с данными, относящимися ко КЛАССУ,
-          но НЕ можем манипулировать данными Экземпляра этого Класса
+        - takes 'cls' as first argument (reference to the Class in which the method is defined)
+        - inside the 'classmethod' we have access to data related to the Class, not Instance!
         """
-        cls.NAME = name  # здесь NAME - атрибут Класса
+        cls.NAME = name  #
 
     @staticmethod
     def print_hello():
         """
         staticmethod:
-        Расположен в КЛАССЕ, но:
-        - не обращается к данным КЛАССА
-        - не обращается к данным Экземпляра КЛАССА
 
-        Поэтому, вызвать staticmethod можно как от имени Класса, так и от имени его Экземпляра
+        when we:
+        - no need to have Class reference (cls) in the method
+        - no need to have Instance reference (self) in the method
+
+        We marked the method as 'staticmethod'
+        and we can call the 'staticmethod' both from the Class and from the Instance
         """
         print("Hello")
 
