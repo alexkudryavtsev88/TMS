@@ -1,6 +1,9 @@
+"""
+Class and Instance of the Class
+"""
 
 """
-This is Class - a layer of Abstraction, which provides a possibility to create our owm types!
+This is Class below - a layer of Abstraction, which provides a possibility to create our owm types!
 ('Class' and 'Type' are synonyms in Python)
 """
 
@@ -40,6 +43,9 @@ class MyClass2(MyClass):
         self.some = "MyClass2 Instance some"
 
 
+"""
+Creating the Class Instance
+"""
 my_class = MyClass  # reference to the MyClass object
 print(type(my_class))  # Class object has type 'type' :)
 
@@ -47,7 +53,9 @@ print(type(my_class))  # Class object has type 'type' :)
 my_instance = MyClass(url="https://amazon.com")
 print(type(my_instance))  # Instance has type by the name of its Class
 
-# Attributes access
+"""
+Attributes access
+"""
 
 # READ Attribute:
 print(my_class.URL)  # read the class attribute
@@ -69,30 +77,25 @@ print(my_instance.new_attr)
 # DELETE Attribute:
 del my_instance.some     # deleting of attribute is also possible!
 
-# Attributes Lookup Algorithm:
+"""
+Attributes Lookup Algorithm
+"""
+
 print(my_instance.some)  # will print the Class 'some' because the Instance 'some' was deleted at line 70
 # This happens because if Attribute by the specified name was NOT found in Instance,
 # the Attributes Lookup Algorithm will search for attributes with this name in Instance's Class!
-# And, if the Attribute was NOT found in Instance's Class anyway,
-# the Lookup Algorithm continues searching for the attribute in Instance's PARENT's Class/Classes!
 
-my_instance2 = MyClass2(url="test")
-print(my_instance2.some)  # will print 'some' of my_instance2
-del my_instance2.some
-print(my_instance2.some)  # will print 'some' of MyClass2
-del my_instance2.__class__.some
-print(my_instance2.some)  # will print 'some' of MyClass which is PARENT Class for MyClass2 Instance
-
-# And, this is a NOT GOOD practice to set Attribute for Instance with the SAME name
-# as the existing Attribute of the Class of this Instance
-
+# NOTE: This is not good practice to set Class attribute and Instance attribute with the SAME name!
 
 # Instance's Methods
 my_instance.some_method()  # call of method belongs to the Instance (cannot call it from the Class!)
 # 'self' (first argument of the method) should NOT be specified explicitly when we call the method!
 # It's needed just for identifying that the method is bound to the Instance of the Class
 
-# # Instances and Classes in Memory
+""" 
+Instances and Classes in Memory
+"""
+
 x = MyClass(url="test")
 y = MyClass(url="test")
 z = MyClass(url="test")
