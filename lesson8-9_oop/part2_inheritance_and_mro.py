@@ -24,12 +24,12 @@ class Triangle:
 class Quadrangle(Triangle):
     def __init__(self, a, b, c, d):
         """
-        Так как Quadrangle является наледником Triangle, но
-        для его инициализации нужно 4 переменных, а не 3:
-        -- вызываем __init__ у РОДИТЕЛЬСКОГО класса через super(),
-           и передаем в этот __init__ первые 3 переменные
-        -- 4-ю переменную сетаем обыкновенным образом через
-           self.variable = variable
+        Quadrangle is the child of Triangle, but for the Initialization
+        of Quadrangle we need 4 arguments, not 3
+        -- call the __init__ of parent class (Triangle) and set
+           a, b, c to it
+        -- set d as simple way (via 'self') because d is related to
+        Quadrangle and NOT related to the Triangle
         """
         super().__init__(a, b, c)
         self.d = d
