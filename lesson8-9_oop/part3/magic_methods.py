@@ -1,4 +1,4 @@
-class MyList:
+class Stack:
     def __init__(self, list_):
         self._list = list_
 
@@ -26,6 +26,7 @@ class MyList:
 
     def __call__(self, *args, **kwargs):
         print(self.__str__())
+
 
 
 my_list = MyList([1, 2, 3, 4, 5])
