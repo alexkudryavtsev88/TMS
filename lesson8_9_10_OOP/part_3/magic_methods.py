@@ -16,16 +16,19 @@ class StringList:
     def __len__(self):
         return len(self._list)
 
-    def __contains__(self, item):
+    def __contains__(self, item) -> bool:
         """Returns True if the specified item is in inner list, otherwise returns False"""
         return item in self._list
 
-    def __add__(self, other):
+    def __add__(self, other: "StringList"):
         """
         Returns the new Instance of StringClass
         with inner list which is concatenated from the previous list
         and the inner list of 'other' object
         """
+        if not isinstance(other, self.__class__):
+            raise TypeError(f"Other has type: {type(other)}")
+
         return self.__class__(source=self._list + other._list)
 
     def __getitem__(self, item: int) -> str:

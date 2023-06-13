@@ -2,13 +2,15 @@
 Inheritance, Multiple Inheritance, MRO
 """
 
+import abc
+
 """
 Single Inheritance
 """
 print("Inheritance: \n")
 
 
-class Triangle:
+class Triangle(abc.ABC):
     def __init__(self, a, b, c):
         self.a = a
         self.b = b
@@ -47,12 +49,13 @@ class Quadrangle(Triangle):
 
 
 # ------------------------------------------------
-triangle = Triangle(1, 2, 3)
-print(triangle.perimeter())    # print the calculated perimeter related to the Triangle instance
+# triangle = Triangle(1, 2, 3)
+# print(triangle.perimeter())
+# print the calculated perimeter related to the Triangle instance
 quadrangle = Quadrangle(1, 2, 3, 4)
 print(quadrangle.perimeter())  # print the calculated perimeter related to the Quadrangle instance
 
-triangle.print_my_name()
+# triangle.print_my_name()
 
 # Quadrangle is CHILD of Triangle, and 'print_my_name' method was not overloaded in Quadrangle class,
 # we can call PARENT method from the CHILD Instance.
@@ -94,6 +97,9 @@ child = Child()
 child.get_parent1_name()  # Call the Parent1 related method from Child Instance
 child.get_parent2_name()  # Call the Parent2 related method from Child Instance
 
+
+print("*" * 100)
+
 """
  The MRO (Methods Order Resolution)
 """
@@ -123,6 +129,9 @@ second_parent = mro[2]
 print(f"Second parent is {first_parent}")
 print("'param' value is " + child.param)
 assert child.param == second_parent.param  # 'param' value is taken from the SECOND PARENT in MRO (Parent2 Class)
+
+del second_parent.param
+print(child.param)
 
 
 

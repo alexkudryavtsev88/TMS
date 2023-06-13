@@ -46,7 +46,7 @@ class MyNewClass:
         - takes 'cls' as first argument (reference to the Class in which the method is defined)
         - inside the 'classmethod' we have access to data related to the Class, not Instance!
         """
-        cls.NAME = name  #
+        cls.NAME = name
 
     @staticmethod
     def print_hello():
@@ -66,9 +66,17 @@ class MyNewClass:
         print(self.NAME)
 
 
+my_class_instance = MyNewClass()
+my_name = my_class_instance.name
+print(my_name)
+
 # Call of 'classmethod' from the Class reference
 MyNewClass.set_name("Alex")
 # NOTE: You CANNOT call the 'classmethod' from the Instance!
+print(my_class_instance.name)
+
+MyNewClass.NAME = "TEST"
+print(my_class_instance.name)
 
 my_class_instance = MyNewClass()
 MyNewClass.print_hello()            # Call of 'static' method from the Class reference
