@@ -17,7 +17,7 @@ class StringList:
         return len(self._list)
 
     def __contains__(self, item):
-        """Returns True if the specified item is in inner list"""
+        """Returns True if the specified item is in inner list, otherwise returns False"""
         return item in self._list
 
     def __add__(self, other):
