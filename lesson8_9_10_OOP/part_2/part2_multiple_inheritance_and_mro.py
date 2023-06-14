@@ -1,13 +1,7 @@
 """
-Inheritance, Multiple Inheritance, MRO
+Multiple Inheritance, MRO
 """
 
-import abc
-
-
-"""
- Multiple Inheritance
-"""
 print("Multiple Inheritance: \n")
 
 
@@ -74,6 +68,7 @@ assert child.param == second_parent.param  # 'param' value is taken from the SEC
 
 del second_parent.param
 print(child.param)
+
 
 
 

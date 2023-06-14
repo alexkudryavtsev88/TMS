@@ -16,6 +16,7 @@ class MyDataClass:
     name: str
     age: int
 
+
 my_dt_obj = MyDataClass(name="Alex", age=34)
 
 """ VS """
