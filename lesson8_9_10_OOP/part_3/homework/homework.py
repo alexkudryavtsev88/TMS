@@ -19,8 +19,40 @@ d) *реализует магические методы сравнения (__e
    причем, name должен сравниваться БЕЗ УЧЕТА регистра
    - при сравнении через операторы >, <, >=, <= должно сравниваться только поле age!
 """
+from dataclasses import dataclass
 
 
+# TASK 1 Example
+@dataclass
+class MyDataClass:
+    a: str
+    b: int
+    c: list
+
+    @classmethod
+    def build(cls, *args):
+        pass
+
+# TESTS for TASK 1
+person1 = MyDataClass.build("TEST", 34, [1, 2, 3])  # valid parameters
+print(person1)
+try:
+    person2 = MyDataClass.build(100, 33, [1, 2, 3])  # invalid parameters
+except Exception as exc:
+    print(exc)
+
+try:
+    person3 = MyDataClass.build("TEST", "33", [1, 2, 3])  # invalid parameters
+except Exception as exc:
+    print(exc)
+
+try:
+    person3 = MyDataClass.build("TEST", 33, (1, 2, 3))  # invalid parameters
+except Exception as exc:
+    print(exc)
+
+
+# TASK 2 Example
 class Person:
 
     def __init__(self, name, age):
