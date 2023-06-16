@@ -51,29 +51,11 @@ class MyPerson:
     def __str__(self):
         return f'{self.name}, {self.age}, {self.my_list}'
 
-    @classmethod
-    def build(cls, name, age, my_list):
-        values = locals()
-        expected_values = cls.__annotations__  # returns dict with attributes names mapped with their types
-        print(expected_values)
-        for attr_name, attr_type in expected_values.items():
-            actual = values.get(attr_name)
-            if not isinstance(actual, attr_type):
-                raise TypeError(
-                    f"Attribute '{attr_name}' should have "
-                    f"type {attr_type}, got: {type(actual)}"
-                )
-
-        return cls(name=name, age=age, my_list=my_list)
-
-    def append(self, some):
-        self.my_list.append(some)
-
 
 person = MyPerson(
     name="Alex",
     age=34,
-    my_list=None  # PyCharm is highlighted this line because my_list attribute has type 'list[str]',
+    my_list=None  # PyCharm is highlighted this line because my_list attribute has type 'list',
                   # and we specify None here.
 
     # BUT! This is ONLY the static type check from PyCharm, for the Python interpreter this code
@@ -90,15 +72,14 @@ try:
 except Exception as exc:
     print(exc)
 
-# We can use method 'build' which validates the types of input parameters:
-try:
-    person1 = MyPerson.build("Alex", 34, [1, 2, 3])  # valid parameters
-    person2 = MyPerson.build("Ann", 33, None)  # invalid parameters
-except Exception as exc:
-    print(exc)
-
 # it's possible to mutate the inner list inside the frozen dataclass instance
-
+person = MyPerson(
+    name="Ann",
+    age=33,
+    my_list=list(range(10))
+)
+person.my_list.append(10)
+assert person.my_list == list(range(11))
 
 # but it's impossible to mutate frozen dataclass instance itself
 try:
