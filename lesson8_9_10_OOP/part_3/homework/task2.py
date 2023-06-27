@@ -30,5 +30,31 @@ class Person:
         return self.age >= other.age
 
 
-person = Person('Alex', 34)
-print(person.year_of_birth)
+person1 = Person('Alex', 34)
+print(person1.year_of_birth)
+
+# ==
+assert person1 == Person('Alex', 34)
+assert person1 == Person('alex', 34)
+assert person1 == Person('ALEX', 34)
+# !=
+assert person1 != Person('Alex!', 34)
+assert person1 != Person('Alex', 35)
+# >
+assert person1 > Person('Alex', 33)
+assert person1 > Person('Ann', 33)
+assert not person1 > Person('Ann', 34)
+# <
+assert person1 < Person('Alex', 35)
+assert person1 < Person('Ann', 35)
+assert not person1 < Person('Ann', 34)
+# >=
+assert person1 >= Person('Alex', 34)
+assert person1 >= Person('Alex', 33)
+assert person1 >= Person('Ann', 34)
+assert person1 >= Person('Ann', 33)
+# <=
+assert person1 <= Person('Alex', 34)
+assert person1 <= Person('Alex', 35)
+assert person1 <= Person('Ann', 34)
+assert person1 <= Person('Ann', 35)
