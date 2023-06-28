@@ -65,7 +65,6 @@ class ListWrapperIterator:
             raise StopIteration
 
 
-
 my_list = ListWrapper(1, 2, 3, 4, 5)
 print(my_list)
 
@@ -83,6 +82,7 @@ for element in my_list:
 """
 Реазилация цикла for под капотом:
 """
+
 
 def for_loop(some_iterable: typing.Iterable):
     iterator = iter(some_iterable)  # получает Итератор у Итерэйбл-объекта
@@ -102,6 +102,7 @@ def for_loop(some_iterable: typing.Iterable):
 Причем, чтобы написать свой Итератор, используя Генератор, не нужно описывать отдельный класс с методами 
 __iter__ и __next__ 
 """
+
 
 # my_gen - функция-генератор, так как содержит оператор yield
 def my_gen(some_list):
@@ -143,6 +144,7 @@ print(sys.getsizeof(from_one_to_million_gen))
 с того места, на котором генератор "заснул" 
 """
 
+
 def generator_function(some_list: typing.List):
     func_name = generator_function.__qualname__
 
@@ -157,7 +159,6 @@ def generator_function(some_list: typing.List):
             print(f"'{func_name}': Continue working...")
         else:
             print(f"'{func_name}': Exit")
-
 
 
 def iterate_over_names(names: typing.List):
