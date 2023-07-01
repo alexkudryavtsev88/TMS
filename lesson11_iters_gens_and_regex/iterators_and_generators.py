@@ -1,8 +1,10 @@
+import time
 import typing
 
 """
 ИТЕРИРУЕМЫЕ ОБЪЕКТЫ (Iterable)
 """
+
 
 class ListWrapper:
     """
@@ -26,6 +28,7 @@ class ListWrapper:
 """
 ИТЕРАТОРЫ (Iterators)
 """
+
 
 class ListWrapperIterator:
     """
@@ -66,7 +69,6 @@ class ListWrapperIterator:
 
 
 my_list = ListWrapper(1, 2, 3, 4, 5)
-print(my_list)
 
 """
 Так как my_list это ссылка на экземпляр класса ListWrapper, который реализует 
@@ -74,18 +76,27 @@ print(my_list)
 и по нему можно итерироваться с помощью цикла for
 """
 for element in my_list:
-    # Цикл for не знает точное количество раз, сколько раз ему нужно повторяться -
-    # он повторяется до тех пор, пока не встретит StopIteration - обработает это исключение
+    # Цикл for не знает о длине Iterable объекта -
+    # он повторяет код внутри себя до тех пор, пока не встретит StopIteration - обработает это исключение
     # и завершится без ошибок
     print(element)
 
+
+# метод __iter__ в классе итератора нужен для того, чтобы мы могли итерироваться по самому Итератору в цикле for
+# также как по Iterable объекту
+my_iterator = iter(my_list)
+for element in my_iterator:
+    print(element)
+
+
 """
-Реазилация цикла for под капотом:
+Реализация цикла for под капотом:
 """
 
 
 def for_loop(some_iterable: typing.Iterable):
-    iterator = iter(some_iterable)  # получает Итератор у Итерэйбл-объекта
+    iterator = iter(some_iterable)  # получает Итератор у Iterable-объекта
+
     while True:                     # бесконечный цикл while
         try:
             return next(iterator)   # возвращает результат вызова iterator.__next__
@@ -98,9 +109,9 @@ def for_loop(some_iterable: typing.Iterable):
 """
 
 """
-1. Объект-генератор реализуют интерфейс Итератора: в самом общем смысле, Генератор это и есть Итератор. 
-Причем, чтобы написать свой Итератор, используя Генератор, не нужно описывать отдельный класс с методами 
-__iter__ и __next__ 
+1. Объект-генератор реализуют интерфейс Итератора: в самом общем смысле, Генератор это и есть Итератор.
+Причем, чтобы написать свой Итератор, используя Генератор, не нужно описывать отдельный класс с методами
+__iter__ и __next__
 """
 
 
@@ -122,7 +133,7 @@ for i in my_iterator:
 # объекту-генератору "обратятся" через вызов next()
 
 """
-2. Генераторы - ленивые. Они отдают один элемент по очереди "по запросу" 
+2. Генераторы - ленивые. Они отдают один элемент по очереди "по запросу"
 и не хранят все данные в памяти одновременно
 """
 import sys
@@ -139,16 +150,15 @@ print(sys.getsizeof(from_one_to_million_gen))
 # так как список хранит все инты от 1 до миллиона в памяти (+ доп. память для новых элементов)
 
 """
-3. Генераторы работают таким образом, что позволяют выполняющемуся внутри коду "засыпать", 
+3. Генераторы работают таким образом, что позволяют выполняющемуся внутри коду "засыпать",
 сохраняя при этом текущее состояние объекта, а после - "просыпаться" и продолжать выполнение
-с того места, на котором генератор "заснул" 
+с того места, на котором генератор "заснул"
 """
 
 
 def generator_function(some_list: typing.List):
     func_name = generator_function.__qualname__
-
-    print(f"'{func_name}': Generator started")
+    print(f"'{func_name}': Generator is started")
 
     for idx, elem in enumerate(some_list):
         print(f"'{func_name}': Returning name '{elem}' and then suspending...")
@@ -160,18 +170,27 @@ def generator_function(some_list: typing.List):
         else:
             print(f"'{func_name}': Exit")
 
+    print(f"'{func_name}': Generator is ended!")
 
 def iterate_over_names(names: typing.List):
     func_name = iterate_over_names.__qualname__
+    print(f"'{func_name}' function is started!")
+
     gen = generator_function(names)
 
+    counter = 0
     for name in gen:
+        counter += 1
+        print(f"Iteration № {counter}")
         print(f"'{func_name}': Current name is '{name}'")
+
+    print(f"{func_name} function is ended!")
 
 
 iterate_over_names(
-    ['Ann', 'Alex', 'John', 'Olga', 'Mary']
+    ['Ann', 'Alex', 'John']
 )
+
 
 
 
