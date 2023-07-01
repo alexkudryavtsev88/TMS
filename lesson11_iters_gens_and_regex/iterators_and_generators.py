@@ -146,7 +146,7 @@ from_one_to_million_gen = (i for i in range(1000001))
 print(sys.getsizeof(from_one_to_million_gen))
 
 # sys.getsizeof() возращает размер переданного его объекта в байтах.
-# from_one_to_million_gen будет занимать гораздо меньше места в памяти, чем from_one_to_million_list
+# *from_one_to_million_gen* будет занимать гораздо меньше места в памяти, чем from_one_to_million_list
 # так как список хранит все инты от 1 до миллиона в памяти (+ доп. память для новых элементов)
 
 """
@@ -160,10 +160,14 @@ def generator_function(some_list: typing.List):
     func_name = generator_function.__qualname__
     print(f"'{func_name}': Generator is started")
 
+    iterations_counter = 0
     for idx, elem in enumerate(some_list):
+        iterations_counter += 1
+        print(f"'{func_name}': Iteration № {iterations_counter}")
+
         print(f"'{func_name}': Returning name '{elem}' and then suspending...")
         yield elem
-        print(f"'{func_name}': Awaking!")
+        print(f"'{func_name}': Generator is Awakened!")
 
         if idx < len(some_list) - 1:
             print(f"'{func_name}': Continue working...")
@@ -171,6 +175,7 @@ def generator_function(some_list: typing.List):
             print(f"'{func_name}': Exit")
 
     print(f"'{func_name}': Generator is ended!")
+
 
 def iterate_over_names(names: typing.List):
     func_name = iterate_over_names.__qualname__
@@ -181,10 +186,10 @@ def iterate_over_names(names: typing.List):
     counter = 0
     for name in gen:
         counter += 1
-        print(f"Iteration № {counter}")
+        print(f"'{func_name}': Iteration № {counter}")
         print(f"'{func_name}': Current name is '{name}'")
 
-    print(f"{func_name} function is ended!")
+    print(f"'{func_name}' function is ended!")
 
 
 iterate_over_names(
