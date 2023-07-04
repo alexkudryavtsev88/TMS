@@ -20,7 +20,7 @@ INSERT INTO comments (title, user_id, post_id)
 VALUES
   ('Wow, It is great!', 1, 2),
   ('I am 32 years old too!', 2, 3),
-  ('I like Java too!', 3, 6);
+  ('I like Java as well!', 3, 6);
 
 -- fill likes table
 INSERT INTO likes (user_id, post_id)
@@ -34,7 +34,7 @@ VALUES
   (3, 5),
   (3, 5);
 
--- Добавлаяем нового юзера, у которого нет постов, комментов и лайков
+-- Добавляем нового юзера, у которого нет постов, комментов и лайков
 INSERT INTO users (name, age, gender, nationality)
 VALUES
   ('John', 35, 'male', 'belarus');

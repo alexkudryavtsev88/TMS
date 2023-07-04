@@ -28,4 +28,4 @@ sudo -i -u postgres
  
 7. create new DB: 
 
-  createdb db_name
+  CREATE DATABASE db_name

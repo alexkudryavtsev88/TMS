@@ -24,7 +24,7 @@ select name, age from users;
 
 
 -- Выбрать все name и age из всех записей в таблице Юзеров, используя кастомные имена стобцов в выводе
-select name as MyName, age as MyAge from users;
+select name as My_Name, age as My_Age from users;
 
 -- myname | myage
 ----------+-------
