@@ -1,0 +1,31 @@
+Connect:
+
+sudo -i -u postgres
+
+1. list databases:
+
+ \l+
+
+2. list tables:
+
+ \d+
+
+3. connect to specific database
+
+ \connect database_name
+ 
+4. list table structure
+
+ \d+ table_name
+
+5. create user
+
+ CREATE USER user_name WITH PASSWORD 'my_pass';
+
+6. list users
+
+ \du
+ 
+7. create new DB: 
+
+  createdb db_name
