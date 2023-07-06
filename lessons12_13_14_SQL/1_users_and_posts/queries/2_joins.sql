@@ -2,6 +2,10 @@
 -- Оператор JOIN
 ---------------
 
+-- ONE-to-ONE
+-- ONE-to-MANY
+-- MANY-to-MANY
+
 -- Вывести всех юзеров (name и age) с именем 'Alex' вместе со связанными постами этих юзеров
 select users.name, users.age, posts.title, posts.description
     from users inner join posts
@@ -80,7 +84,8 @@ select * from users left join posts on users.id = posts.user_id;
 
 -- 3. RIGHT OUTER JOIN (или просто RIGHT JOIN)
 
-select * from posts right join users on users.id = posts.user_id;
+select *
+from posts p right join users u on u.id = p.user_id;
 --
 -- id |     title     |                 description                  | user_id | id | name | age | gender | nationality
 ------+---------------+----------------------------------------------+---------+----+------+-----+--------+-------------
@@ -103,4 +108,4 @@ select * from posts right join users on users.id = posts.user_id;
 -- 1. Если строки без связей могут содержаться в ЛЕВОЙ таблице (СЛЕВА от JOIN) - то объединяем через LEFT JOIN
 -- 2. Если строки без связей могут содержаться в ПРАВОЙ таблице (СПРАВА от JOIN) - то объединяем через RIGHT JOIN
 -- 3. Если строки без связей могут содержаться в ОБЕИХ таблицах - то объединяем через FULL JOIN
---    (в нашем случае FULL JOIN не логичен, так как даже в теории не может сществовать постов, НЕ привязанных к конкретным юзерам)
+--    (в нашем случае FULL JOIN не логичен, так как даже в теории не может существовать постов, НЕ привязанных к конкретным юзерам)

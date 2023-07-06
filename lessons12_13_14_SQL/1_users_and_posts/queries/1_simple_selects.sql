@@ -66,8 +66,7 @@ select name as "My Name", age as "My Age" from users offset 1;
 -- John    |     35
 --(3 rows)
 
-
--- WHERE: позволяет фильровать данные для вывода по условию:
+-- WHERE: позволяет фильтровать данные для вывода по условию:
 
 -- Все юзеры, у которых возраст больше 25 лет
 select * from users where age > 25;
@@ -80,7 +79,7 @@ select * from users where age > 25;
 --(3 rows)
 
 -- Все юзеры, у которых возраст равен 25 ИЛИ равен 35
-select *  from users where age in (25, 35);
+select * from users where age in (25, 35);
 
 -- id | name | age | gender | nationality
 ------+------+-----+--------+-------------

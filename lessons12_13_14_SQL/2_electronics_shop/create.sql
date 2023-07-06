@@ -22,7 +22,7 @@ VALUES
 	('Laptop'),
 	('Tablet');
 
-INSERT INTO products (product_name, group_id,price)
+INSERT INTO products (product_name, group_id, price)
 VALUES
 	('Microsoft Lumia', 1, 200),
 	('HTC One', 1, 400),

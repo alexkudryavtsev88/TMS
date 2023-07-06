@@ -1,5 +1,5 @@
 -----------------------
--- Агрегатные функции
+-- Агрегатные функции --
 -----------------------
 
 -- COUNT - Общее количество
@@ -43,7 +43,7 @@ select min(age) as "Min age", max(age) as "Max age" from users;
 -- Вывести количество лайков по всем постам (если лайков на постах нет - не учитываем эти посты),
 -- с сортировкой от большего количества лайков к меньшему
 select p.title, p.description, count(l.id) as likes_count
-    from posts p join likes l
+    from posts p left join likes l
     on p.id = l.post_id
     group by p.title, p.description
     order by likes_count desc;
@@ -136,18 +136,19 @@ select u.name, p.title, p.description, count(l.id) as likes_count
     group by u.name, p.id
     order by likes_count desc;
 
+
 -- name |     title     |                 description                  | likes_count
 --------+---------------+----------------------------------------------+-------------
--- Alex | Alex 2nd post | My favourite programming language is Python! |           4
--- Alex | Alex 1st post | Hello from ALEX!                             |           4
--- Alex | Alex 1st post | Hello! I am Alex, I am 34 years old          |           4
+-- Alex | Alex 2nd post | My favourite programming language is Python! |       4
+-- Alex | Alex 1st post | Hello from ALEX!                             |       4
+-- Alex | Alex 1st post | Hello! I am Alex, I am 34 years old          |       4
 -- Kate | Kate 2nd post | My favourite programming language is Java!   |           3
 -- Kate | Kate 1st post | Hello! I am Kate, I am 25 years old          |           3
 -- Ann  | Ann 1st post  | Hello! I am Ann, I am 32 years old           |           2
 -- Ann  | Ann 2nd post  | My favourite programming language is Rust!   |           2
 
 
--- Статистика, выведенная в результате запроса не совсем корретная:
+-- Статистика, выведенная в результате запроса не совсем корректная:
 -- Мы видим likes_count = 4 во всех строках, где users.name = Alex,
 -- и это похоже на то, будто у КАЖДОГО поста юзера Alex по 4 лайка, но это не так!
 
