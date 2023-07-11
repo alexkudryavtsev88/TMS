@@ -80,7 +80,5 @@ WORDS = [
     ("Piece", "Peace"),
     ("Kitten", "Sitting"),
 ]
-
-
 calculate_levenshtein_in_one_thread(words=WORDS)
 calculate_levenshtein_in_many_threads(words=WORDS)
