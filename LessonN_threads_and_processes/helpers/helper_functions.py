@@ -14,6 +14,8 @@ def work(arg: int):
 
     logger.debug(f'End')
 
+    return arg
+
 
 def raise_exc_with_delay(delay: int):
     logger.debug('Start')
