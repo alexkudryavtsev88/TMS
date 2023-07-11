@@ -7,8 +7,10 @@ logger = setup_logging(__name__)
 
 
 def work(arg: int):
-    logger.debug(f'Start')
-    logger.debug(f"Sleeping for {arg} seconds")
+    name = work.__qualname__
+
+    logger.debug(f"'{name}': Start")
+    logger.debug(f"'{name}': Sleeping for {arg} seconds")
 
     time.sleep(arg)
 
@@ -18,8 +20,10 @@ def work(arg: int):
 
 
 def raise_exc_with_delay(delay: int):
-    logger.debug('Start')
-    logger.debug(f"Sleeping for {delay} seconds")
+    name = raise_exc_with_delay.__qualname__
+
+    logger.debug(f"'{name}': Start")
+    logger.debug(f"'{name}': Sleeping for {delay} seconds")
 
     time.sleep(delay)
     raise RuntimeError('fail!')
