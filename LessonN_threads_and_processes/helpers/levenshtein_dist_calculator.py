@@ -19,4 +19,5 @@ class LevenshteinDistanceCalculator:
                     calc_dist(i - 1, j),
                     calc_dist(i - 1, j - 1)
                 )
+
         return calc_dist(len(word_a), len(word_b))

@@ -1,3 +1,5 @@
+import random
+
 from LessonN_threads_and_processes.helpers.custom_logger import setup_logging
 import time
 
@@ -19,3 +21,11 @@ def raise_exc_with_delay(delay: int):
 
     time.sleep(delay)
     raise RuntimeError('fail!')
+
+
+def random_long_word():
+    return "".join(
+        [
+            random.choice(("A", "B")) for _ in range(100)
+        ]
+    )
