@@ -1,29 +1,12 @@
-import time
 from threading import Thread, current_thread
-from LessonN_threads_and_processes.custom_logger import setup_logging
+from LessonN_threads_and_processes.helpers.custom_logger import setup_logging
+from LessonN_threads_and_processes.helpers.helper_functions import work, raise_exc_with_delay
 
 
 logger = setup_logging(__name__)
 
 
 TIME_SLEEP = 3
-
-
-def work(arg: int):
-    logger.debug(f'Start')
-    logger.debug(f"Sleeping for {arg} seconds")
-
-    time.sleep(arg)
-
-    logger.debug(f'End')
-
-
-def raise_exc_with_delay(delay: int):
-    logger.debug('Start')
-    logger.debug(f"Sleeping for {delay} seconds")
-
-    time.sleep(delay)
-    raise RuntimeError('fail!')
 
 
 logger.info(f'Start')
@@ -82,40 +65,4 @@ t3.start()
 logger.info(f'Thread {current_thread().name} END')
 
 
-def my_func(arg: int):
-    cur_thread_name = current_thread().name
-    print(f"Thread {cur_thread_name} start with sleep: {arg}")
-    time.sleep(arg)
-    print(f"Thread {cur_thread_name} end")
 
-
-def run_in_one_thread(data: tuple[int, ...]):
-    print(f"run_in_one_thread: start program!")
-
-    start_time = time.perf_counter()
-    for i in data:
-        my_func(i)
-
-    print(f"run_in_many_threads: common exec time is {time.perf_counter() - start_time}")
-
-
-def run_in_many_threads(data: tuple[int, ...]):
-    print(f"run_in_many_threads: start program ({len(data)} threads)")
-    running_threads = []
-
-    start_time = time.perf_counter()
-    for i in data:
-        thread = Thread(target=my_func, args=(i, ))
-        thread.start()
-        running_threads.append(thread)
-
-    for t in running_threads:
-        t.join()
-
-    print(f"run_in_many_threads: common exec time is {time.perf_counter() - start_time}")
-
-
-# my_data = (3, 7, 4, 1, 0, 6, 2, 5, 8)
-# run_in_one_thread(my_data)
-# print("*" * 50)
-# run_in_many_threads(my_data)
