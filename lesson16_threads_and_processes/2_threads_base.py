@@ -1,6 +1,6 @@
 from threading import Thread, current_thread
-from LessonN_threads_and_processes.helpers.custom_logger import setup_logging
-from LessonN_threads_and_processes.helpers.helper_functions import work, raise_exc_with_delay
+from lesson16_threads_and_processes.helpers.custom_logger import setup_logging
+from lesson16_threads_and_processes.helpers.helper_functions import work, raise_exc_with_delay
 
 
 logger = setup_logging(__name__)
@@ -51,7 +51,7 @@ logger.info(f"Doesn't wait for the {t2.name} thread!")
 t3 = Thread(
     target=raise_exc_with_delay,
     name="ChildThreadDaemon",
-    args=(TIME_SLEEP, ),
+    args=(2, ),
     daemon=True,
 )
 logger.info(f'DAEMON thread {t3.name} is created')
