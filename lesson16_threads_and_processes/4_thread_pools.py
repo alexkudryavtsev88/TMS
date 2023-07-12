@@ -30,21 +30,7 @@ with cf.ThreadPoolExecutor(max_workers=MAX_WORKERS) as threads_executor:
 """
 
 
-# # CASE 1: using ThreadPoolExecutor.map
-# start_time = time.perf_counter()
-# with ThreadPoolExecutor(
-#         max_workers=max_workers,
-#         thread_name_prefix="DownloadSitesThreadPool"
-# ) as thread_pool_ex:
-#     results = thread_pool_ex.map(download_site, SITES)
-#
-# duration = time.perf_counter() - start_time
-#
-# print(results)
-# print(f"Downloaded {len(SITES)} sites THREADED in {duration} seconds")
-
-
-DELAYS = [5, 2, 3]
+DELAYS = (5, 2, 3)
 
 
 # CASE 1: run 'work' func in separate threads using 'ThreadPoolExecutor.map' method
