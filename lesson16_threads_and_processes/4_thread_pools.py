@@ -1,9 +1,7 @@
-# import concurrent.futures
 import logging
-import threading
-from concurrent.futures import ThreadPoolExecutor
+import concurrent.futures as cf
 import time
-import requests
+
 
 from lesson16_threads_and_processes.helpers.helper_functions import work, raise_exc_with_delay
 
@@ -11,76 +9,112 @@ urllib3_logger = logging.getLogger('urllib3.connectionpool')
 urllib3_logger.setLevel(logging.ERROR)
 
 
-SITES = (
-        "https://www.jython.org",
-        "http://olympus.realpython.org/dice",
-) * 20
-
-
-SUCCESS = "success"
-ERROR = "error"
-LOCK = threading.Lock()
-THREAD_LOCAL = threading.local()
-
-
-def get_session():
-    if not hasattr(THREAD_LOCAL, "session"):
-        THREAD_LOCAL.session = requests.Session()
-    return THREAD_LOCAL.session
-
-
-def download_site(url):
-    session = get_session()
-    current_thread_name = threading.current_thread().name
-
-    try:
-        # with session.get(url) as resp:
-            # resp.raise_for_status()
-
-        message = SUCCESS
-
-        with LOCK:
-            print(f"{current_thread_name}: {message}")
-
-        # print(f"{current_thread_name}: {message}")
-
-    except requests.RequestException:
-        message = ERROR
-        print(f"{current_thread_name}: {message}")
-
-    return current_thread_name, message
-
-
-max_workers = 100
-
-# CASE 1: using ThreadPoolExecutor.map
-start_time = time.perf_counter()
-with ThreadPoolExecutor(
-        max_workers=max_workers,
-        thread_name_prefix="DownloadSitesThreadPool"
-) as thread_pool_ex:
-    results = thread_pool_ex.map(download_site, SITES)
-
-duration = time.perf_counter() - start_time
-
-print(results)
-print(f"Downloaded {len(SITES)} sites THREADED in {duration} seconds")
-
-
-# CASE 1: using ThreadPoolExecutor.submit
-time_to_wait = [2, 5, 0, 3, 1]
-
-
-# without automatic waiting for the all running threads
-# start_t = time.perf_counter()
-# thread_pool_ex = ThreadPoolExecutor(
-#         max_workers=3,
-#         thread_name_prefix="SubmitThreadPool"
-# )
+MAX_WORKERS = 3
 
 """
-The call of 'ThreadPoolExecutor.submit' method returns the 'concurrent.futures.Future' object:
-# The Future is an abstract Object which wraps some Action which can last a long time.
+ThreadPoolExecutor initialization
+"""
+with cf.ThreadPoolExecutor(max_workers=MAX_WORKERS) as threads_executor:
+    pass
+
+"""
+1. ThreadPoolExecutor usually used as Context Manager ("with ... as ..." syntax)
+   in this case the Executor waits for the ALL Threads running within it by default
+2. 'max_workers' specifies the LIMIT count of Threads which can be created at all 
+   within the ThreadPoolExecutor instance. 
+   The Executor manages its Threads:
+   - it spawns the new Threads only when needed: if the count of Tasks for execution is MORE 
+     than the count of the existing Threads, and if all existing Threads are busy by some Tasks, 
+     the Executor spawns the new Threads.  
+   - if some Thread finish its work - the Executor assigns some another tasks to it.
+"""
+
+
+# # CASE 1: using ThreadPoolExecutor.map
+# start_time = time.perf_counter()
+# with ThreadPoolExecutor(
+#         max_workers=max_workers,
+#         thread_name_prefix="DownloadSitesThreadPool"
+# ) as thread_pool_ex:
+#     results = thread_pool_ex.map(download_site, SITES)
+#
+# duration = time.perf_counter() - start_time
+#
+# print(results)
+# print(f"Downloaded {len(SITES)} sites THREADED in {duration} seconds")
+
+
+DELAYS = [5, 2, 3]
+
+
+# CASE 1: run 'work' func in separate threads using 'ThreadPoolExecutor.map' method
+def using_executor_map():
+    """
+    # use 'ThreadPoolExecutor.map' method when:
+    # - you need to run exact one function in separate threads
+    # and this function takes exact one input argument
+    # - you need to get results of threads tasks
+    # - you don't need to communicate with *Future objects directly
+    # - you don't need for some waiting timeouts
+
+    """
+    t1 = time.perf_counter()
+    with cf.ThreadPoolExecutor(
+            max_workers=MAX_WORKERS
+    ) as executor:
+        res = executor.map(work, DELAYS)
+
+        # INPUT:
+        # - takes some func to execute 1st argument
+        # - takes iterable of arguments for the function as 2nd argument
+        # - runs passed func with each argument from iterable in separate thread
+        # - NOTE: the func should take only one argument!
+
+        # OUTPUT:
+        # - returns an iterator over the threads task results
+
+        # - NOTE: the iterator returns immediately, without real waiting the tasks results
+        print('exec time: ', time.perf_counter() - t1)
+
+        # - collecting the results from iterator
+        # to list/tuple will wait for the all tasks are finished
+        # - results are in the same order as elements in second argument's Iterabl
+        res_list = list(res)
+        print(res_list)
+        print('exec time: ', time.perf_counter() - t1)
+
+
+# using_executor_map()
+print("*" * 50)
+
+
+# CASE 2: using most general 'ThreadPoolExecutor.submit' method
+# NOTE: 'map' method uses 'submit' under the hood
+def using_executor_submit():
+    """
+    # - 'submit' method returns a *Future object
+    # - using 'submit' you can run any functions with any count of arguments
+    # - using 'submit' you can combine a different functions for execution in threads
+    # - using Future objects returning from 'submit', you have a different ways to process the results of threads tasks
+    """
+    t2 = time.perf_counter()
+    with cf.ThreadPoolExecutor(
+            max_workers=MAX_WORKERS
+    ) as ex:
+        futs = [ex.submit(work, d) for d in DELAYS]
+        print(futs)
+        print('exec time: ', time.perf_counter() - t2)
+
+        print([f.result() for f in futs])
+        print('exec time: ', time.perf_counter() - t2)
+
+
+# using_executor_submit()
+print("*" * 50)
+
+
+"""
+# *Future is an abstract Object which wraps some Action which can last a long time.
 # The general principal of using Futures is that you can get the Future Object immediately
 # (for example, right after the call of some method which returns Future), but this Future object
 # itself can be in a different states at a different points of time.
@@ -90,48 +124,118 @@ and at different points of time the Future
 # OR not: if the wrapped Action is still in progress
 # Full list of Future statuses: pending, running, done, cancelled 
 """
-# futures = [thread_pool_ex.submit(work, t) for t in time_to_wait]
-# futures.append(
-#     thread_pool_ex.submit(raise_exc_with_delay, 1)
-# )
-
-#print(futures)  # futures list created and printed immediately, without waiting the results
-
-# We don't see the Exception which raised in 'raise_exc_with_delay' func
-# print(f'Exec time: {time.perf_counter() - start_t}')
 
 
-# future_with_exc = futures.pop()
-# If we call '.result()' on Future with Exception - this Exception will be raised!
-# But here we delete the Future with Exception from futures list
-# results = [future.result() for future in futures]
-# print(results)
-#
-# raised_exc = future_with_exc.exception()
-# print(type(raised_exc))
-# print(raised_exc.args)
+# don't use 'submit' like this!
+def using_submit_in_loop_with_blocking():
+    results = []
 
-# with automatic waiting for the all running threads
+    t = time.perf_counter()
+    with cf.ThreadPoolExecutor(
+            max_workers=MAX_WORKERS
+    ) as ex:
+        for d in DELAYS:
+            # you create a Future here
+            fut = ex.submit(work, d)  # you create a Future here
+            # and here you call result() which blocks the current iteration
+            # of the loop until the future has been done
+            r = fut.result()
+            results.append(r)
+        print('exec time: ', time.perf_counter() - t)
 
-# longest_time = max(time_to_wait)
-# expected_time_check = lambda t: longest_time <= t < longest_time + 1
-#
-# start_t = time.perf_counter()
-# with ThreadPoolExecutor(
-#     max_workers=3,
-#     thread_name_prefix="SubmitThreadPool"
-# ) as thread_pool_ex:
-#     futures = [thread_pool_ex.submit(work, t) for t in time_to_wait]
-#     print(futures)
-#
-# futures_results = [future.result() for future in futures]
-# print(futures_results)
-#
-# end_t = time.perf_counter() - start_t
-# print(f'Exec time: {end_t}')
-# assert expected_time_check(end_t)
-#
-# assert futures_results == time_to_wait
+
+# using_submit_in_loop_with_blocking()  # the exec time of this function is 10+ seconds (sum of DELAYS)
+print("*" * 50)
+
+
+def handling_exceptions_in_futures():
+    """
+    # If some Exception was occurred in some
+    # Future, the Future.result() call will raise it.
+    # Therefore, it's better to wrap the 'result' call in try/except:
+    """
+    with cf.ThreadPoolExecutor(
+        max_workers=MAX_WORKERS
+    ) as executor:
+
+        futs = [executor.submit(work, d) for d in (1, 2)]
+        futs.append(
+            executor.submit(raise_exc_with_delay, 1)
+        )
+        passes, fails = [], []
+        for f in futs:
+            try:
+                passes.append(f.result())
+            except RuntimeError as exc:
+                fails.append(
+                    (type(exc), str(exc))
+                )
+
+        print("results: ", passes)
+        print("errors: ", fails)
+
+        # OR you can extract the Exception object
+        # from the Future without raising this Exception
+        fut_with_exc = executor.submit(raise_exc_with_delay, 1)
+        exc = fut_with_exc.exception()
+        print(type(exc), exc, sep=", ")
+
+        print(fut_with_exc.exception())
+
+
+# handling_exceptions_in_futures()
+print("*" * 50)
+
+
+def using_submit_and_as_completed():
+    """
+    getting the results in order as they were received
+    """
+
+    with cf.ThreadPoolExecutor(
+            max_workers=3
+    ) as ex:
+        t = time.perf_counter()
+        futs = [ex.submit(work, d) for d in (9, 5, 1)]
+
+        res = [f.result() for f in cf.as_completed(futs)]
+        print('exec time: ', time.perf_counter() - t)
+        print(res)
+
+
+# using_submit_and_as_completed()
+print("*" * 50)
+
+
+def using_wait_with_timeout():
+    """
+    using concurrent.futures.wait function
+    """
+    delays = (3, 5, 2)
+
+    t = time.perf_counter()
+    with cf.ThreadPoolExecutor(
+        max_workers=MAX_WORKERS
+    ) as executor:
+        futs = [executor.submit(work, d) for d in delays]
+
+        # with specified timeout
+        done_and_undone_futs = cf.wait(
+            futs, timeout=max(delays) - 1
+        )
+        print('exec time: ', time.perf_counter() - t)  # exec time is 4.00+ seconds
+
+        # Also we can extract the results from Done and Undone Futures
+        done = [f.result() for f in done_and_undone_futs.done]
+        undone = [f.result() for f in done_and_undone_futs.not_done]
+        print('exec time: ', time.perf_counter() - t)  # exec time is 5.00+ seconds
+        # this means that we spent this 1 second when extract the result from the Undone Future
+
+        print(done)
+        print(undone)
+
+
+using_wait_with_timeout()
 
 
 
