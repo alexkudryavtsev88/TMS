@@ -51,7 +51,7 @@ logger.info(f"Doesn't wait for the {t2.name} thread!")
 t3 = Thread(
     target=raise_exc_with_delay,
     name="ChildThreadDaemon",
-    args=(2, ),
+    args=(3, ),
     daemon=True,
 )
 logger.info(f'DAEMON thread {t3.name} is created')

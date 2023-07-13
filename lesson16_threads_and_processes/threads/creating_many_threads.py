@@ -1,4 +1,3 @@
-# import random
 import time
 from threading import Thread
 from lesson16_threads_and_processes.helpers.custom_logger import setup_logging
@@ -78,15 +77,16 @@ def calculate_levenshtein_in_many_threads(words: list[tuple[str, str]]):
         f"common exec time is {exec_time} ms")
 
 
-WORDS = [
-    ("", ""),
-    ("", "Test"),
-    ("Levenshtein", ""),
-    ("Test", "Test"),
-    ("python", "Python"),
-    ("Form", "Fork"),
-    ("Piece", "Peace"),
-    ("Kitten", "Sitting"),
-]
-calculate_levenshtein_in_one_thread(words=WORDS)
-calculate_levenshtein_in_many_threads(words=WORDS)
+if __name__ == '__main__':
+    WORDS = [
+        ("", ""),
+        ("", "Test"),
+        ("Levenshtein", ""),
+        ("Test", "Test"),
+        ("python", "Python"),
+        ("Form", "Fork"),
+        ("Piece", "Peace"),
+        ("Kitten", "Sitting"),
+    ]
+    calculate_levenshtein_in_one_thread(words=WORDS)
+    calculate_levenshtein_in_many_threads(words=WORDS)

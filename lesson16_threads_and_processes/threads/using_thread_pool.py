@@ -1,12 +1,12 @@
-import logging
 import concurrent.futures as cf
+import logging
 import time
 
-
+from lesson16_threads_and_processes.helpers.custom_logger import setup_logging
 from lesson16_threads_and_processes.helpers.helper_functions import work, raise_exc_with_delay
 
-urllib3_logger = logging.getLogger('urllib3.connectionpool')
-urllib3_logger.setLevel(logging.ERROR)
+
+logger = setup_logging(__name__)
 
 
 MAX_WORKERS = 3

@@ -24,7 +24,7 @@ class ColoredFormatter(logging.Formatter):
 
     RESET = "\033[0m"
 
-    format = "%(asctime)s.%(msecs)03d %(levelname)s [%(threadName)s] -> %(message)s"
+    format = "%(asctime)s.%(msecs)03d %(levelname)s [%(processName)s: %(threadName)s] -> %(message)s"
     datefmt = "%Y-%m-%d,%H:%M:%S"
 
     FORMATS = {
@@ -44,7 +44,7 @@ class ColoredFormatter(logging.Formatter):
 def setup_logging(logger_name: str):
     logging.basicConfig(
         format="%(asctime)s.%(msecs)03d %(levelname)s "
-               "[%(name)s:%(funcName)s] [%(threadName)s] -> %(message)s",
+               "[%(name)s:%(funcName)s] [%(processName)s: %(threadName)s] -> %(message)s",
         datefmt="%Y-%m-%d,%H:%M:%S",
         stream=sys.stdout,
         level=logging.DEBUG
