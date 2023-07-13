@@ -5,8 +5,7 @@ import time
 
 from lesson16_threads_and_processes.helpers.custom_logger import setup_logging
 
-# logger = logging.getLogger('processes-share-data')
-# setup_logging(logger)
+logger = setup_logging(__name__)
 
 DATA = []
 
