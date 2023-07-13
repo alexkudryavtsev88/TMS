@@ -3,42 +3,44 @@ import multiprocessing as mp
 import threading
 import threading as th
 import time
+from collections import deque
 
 from lesson16_threads_and_processes.helpers.custom_logger import setup_logging
 
 logger = setup_logging(__name__)
 
-DATA = []
+QUEUE = deque()
 
 
 def add_value(val):
     logger.debug('start')
     logger.debug(f'adding value {repr(val)}')
 
-    DATA.append(val)
+    QUEUE.append(val)
 
-    logger.debug(f"DATA after update: {DATA}")
+    logger.debug(f"QUEUE after update: {QUEUE}")
 
 
-def get_value(idx):
+def get_value():
     logger.warning('start')
-    logger.warning(f'getting value by index {idx}')
+    logger.warning('getting value...')
 
     time.sleep(0.5)
 
     try:
-        logger.warning(f"Element by Index {idx}: {DATA[idx]}")
-    except IndexError as exc:
-        logger.error(f'Error is occurred! Index {idx}, "{exc}"')
+        val = QUEUE.pop()
+        logger.warning(f"Value from Queue: {repr(val)}")
+    except Exception as exc:
+        logger.error(f'Error is occurred! {exc}')
 
 
 def run_concurrently(using_processes: bool = False):
     logger.info('start')
-    logger.info(f"DATA before the Processes have started: {DATA}")
+    logger.info(f"QUEUE before the Processes have started: {QUEUE}")
 
     exec_unit = mp.Process if using_processes else threading.Thread
     p1 = exec_unit(target=add_value, args=('test',))
-    p2 = exec_unit(target=get_value, args=(0,))
+    p2 = exec_unit(target=get_value)
 
     for p in p1, p2:
         p.start()
@@ -46,7 +48,7 @@ def run_concurrently(using_processes: bool = False):
     for p in p1, p2:
         p.join()
 
-    logger.info(f"DATA after All Processes have finished: {DATA}")
+    logger.info(f"QUEUE after All Processes have finished: {QUEUE}")
 
 
-run_concurrently(using_processes=True)
+run_concurrently(using_processes=False)

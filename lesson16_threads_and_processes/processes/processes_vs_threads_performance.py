@@ -45,6 +45,7 @@ def calculate_levenshtein_in_many_processes(words: list[tuple[str, str]]):
         f"common exec time is {exec_time} ms")
 
 
+
 WORDS = [
     ("", ""),
     ("", "Test"),
