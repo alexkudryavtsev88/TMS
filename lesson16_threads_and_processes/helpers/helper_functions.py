@@ -6,7 +6,7 @@ import time
 logger = setup_logging(__name__)
 
 
-def work(arg: int):
+def work(arg: int | float):
     name = work.__qualname__
 
     logger.debug(f"'{name}': Start")
@@ -19,7 +19,7 @@ def work(arg: int):
     return arg
 
 
-def raise_exc_with_delay(delay: int):
+def raise_exc_with_delay(delay: int | float):
     name = raise_exc_with_delay.__qualname__
 
     logger.debug(f"'{name}': Start")

@@ -212,17 +212,18 @@ def using_wait_with_timeout():
         # 'exec time' is 4.00+ seconds: the Timeout value
         print('exec time: ', time.perf_counter() - t)
 
+        done_futs, undone_futs = done_and_undone_futs.done, done_and_undone_futs.not_done
         # Also we can extract the results from Done and Undone Futures
-        done = [f.result() for f in done_and_undone_futs.done]
+        done_results = [f.result() for f in done_futs]
         # 'exec time' is the SAME (almost) as the 'exec time' above
         print('exec time: ', time.perf_counter() - t)
-        print(done)
+        print(done_results)
 
-        undone = [f.result() for f in done_and_undone_futs.not_done]
+        undone_results = [f.result() for f in undone_futs]
         # 'exec time' is 5.00+ seconds: the Time of execution of the SLOWEST Task (+ small Overhead).
         # This because we need to wait this additional 1 second when extract the result from the Undone Future
         print('exec time: ', time.perf_counter() - t)
-        print(undone)
+        print(undone_results)
 
         # *If you shift the code at lines 208-221 on ONE INDENT LEFT (Out of the ThreadPoolExecutor
         # context manager body), your FIRST 'exec_time' will be the SAME as LAST 'exec_time'
@@ -230,8 +231,8 @@ def using_wait_with_timeout():
         # This is because the ThreadPoolExecutor instance automatically waits for ALL Futures have been completed!
 
 
-using_wait_with_timeout()
-# print("*" * 50)
+# using_wait_with_timeout()
+print("*" * 50)
 
 
 def using_wait_with_first_completed():
@@ -250,19 +251,70 @@ def using_wait_with_first_completed():
             futs,
             return_when=cf.FIRST_COMPLETED  # by default 'return_when=cf.ALL_COMPLETED'
         )
+        done_futs = done_and_undone_futs.done
 
         # exec time is 2.00+ seconds: the Time of execution of the FASTEST Task
         print('exec time: ', time.perf_counter() - t)
 
-        done = [f.result() for f in done_and_undone_futs.done]
+        done_results = [f.result() for f in done_futs]
         # 'exec time' is the SAME (almost) as the 'exec time' above
         print('exec time: ', time.perf_counter() - t)
-        print(done)
+        print(done_results)
+
+        # Here will be the same behaviour as in function 'using_wait_with_timeout':
+        # if you will try to extract the Undone Futures, you will have additional wait time
+        # for this, and the final 'exec time' for processing will be 5.00+ seconds
+        # (the Time of execution of the SLOWEST Task)
+
+
+# using_wait_with_first_completed()
+print("*" * 50)
+
+
+def using_wait_with_first_exception():
+    """
+    using concurrent.futures.wait function with return_when=FIRST_COMPLETED argument
+    """
+    delays = (2, 5, 3)
+
+    t = time.perf_counter()
+    with cf.ThreadPoolExecutor(
+        max_workers=MAX_WORKERS
+    ) as executor:
+        futs = [executor.submit(raise_exc_with_delay, 1.3)]
+        futs.extend([executor.submit(work, d) for d in delays])
+
+        done_and_undone_futs = cf.wait(
+            futs,
+            return_when=cf.FIRST_EXCEPTION
+        )
+        done_futs, undone_futs = done_and_undone_futs.done, done_and_undone_futs.not_done
+
+        # exec time is 1.30+ seconds: the Time of execution of the Task which raises Exception
+        print('exec time: ', time.perf_counter() - t)
+
+        # Fist Task which was executed raises Exception, and we wait for FIRST_EXCEPTION,
+        # and this Task's Future is placed to the 'done_futs' set
+        done_fut = next(iter(done_futs), None)  # we sure that we have Only 1 Future is in DONE set
+        print(done_fut)  # print this Future
+
+        # 'exec time' is the SAME (almost) as the 'exec time' above
+        print('exec time: ', time.perf_counter() - t)
+
+        undone_futures = done_and_undone_futs.not_done
+        for f in undone_futures:
+            f.cancel()
+
+        print([f.result() for f in undone_futures])
+
+        # done = [f.result() for f in done_and_undone_futs.done]
+        # 'exec time' is the SAME (almost) as the 'exec time' above
+        print('exec time: ', time.perf_counter() - t)
+        # print(done)
 
         # Here will be the same behaviour as in function 'using_wait_with_timeout':
         # if you will try to extract the Undone Futures, you will have additional wait time
         # for this, at the last 'exec time' will be 5.00+ seconds - the Time of execution of the SLOWEST Task
 
 
-using_wait_with_first_completed()
-
+# using_wait_with_first_exception()
