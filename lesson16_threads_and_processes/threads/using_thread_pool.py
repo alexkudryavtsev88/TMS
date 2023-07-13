@@ -87,11 +87,11 @@ def using_executor_submit():
     with cf.ThreadPoolExecutor(
             max_workers=MAX_WORKERS
     ) as ex:
-        futs = [ex.submit(work, d) for d in DELAYS]
-        print(futs)
+        futures_list = [ex.submit(work, d) for d in DELAYS]
+        print(futures_list)
         print('exec time: ', time.perf_counter() - t2)
 
-        print([f.result() for f in futs])
+        print([f.result() for f in futures_list])
         print('exec time: ', time.perf_counter() - t2)
 
 
@@ -144,12 +144,12 @@ def handling_exceptions_in_futures():
         max_workers=MAX_WORKERS
     ) as executor:
 
-        futs = [executor.submit(work, d) for d in (1, 2)]
-        futs.append(
+        futures_list = [executor.submit(work, d) for d in (1, 2)]
+        futures_list.append(
             executor.submit(raise_exc_with_delay, 1)
         )
         passes, fails = [], []
-        for f in futs:
+        for f in futures_list:
             try:
                 passes.append(f.result())
             except RuntimeError as exc:
@@ -182,9 +182,9 @@ def using_submit_and_as_completed():
             max_workers=3
     ) as ex:
         t = time.perf_counter()
-        futs = [ex.submit(work, d) for d in (9, 5, 1)]
+        futures_list = [ex.submit(work, d) for d in (9, 5, 1)]
 
-        res = [f.result() for f in cf.as_completed(futs)]
+        res = [f.result() for f in cf.as_completed(futures_list)]
         print('exec time: ', time.perf_counter() - t)
         print(res)
 
@@ -203,23 +203,25 @@ def using_wait_with_timeout():
     with cf.ThreadPoolExecutor(
         max_workers=MAX_WORKERS
     ) as executor:
-        futs = [executor.submit(work, d) for d in delays]
-
-        done_and_undone_futs = cf.wait(
-            futs,
+        futures_list = [executor.submit(work, d) for d in delays]
+        done_and_undone_futures = cf.wait(
+            futures_list,
             timeout=max(delays) - 1
         )
         # 'exec time' is 4.00+ seconds: the Timeout value
         print('exec time: ', time.perf_counter() - t)
 
-        done_futs, undone_futs = done_and_undone_futs.done, done_and_undone_futs.not_done
-        # Also we can extract the results from Done and Undone Futures
-        done_results = [f.result() for f in done_futs]
+        done_futures, undone_futures = done_and_undone_futures.done, done_and_undone_futures.not_done
+        print(f'Done futures: {done_futures}')
+        print(f'Undone futures: {undone_futures}')
+
+        # Also we can extract the Results from Done and Undone Futures
+        done_results = [f.result() for f in done_futures]
         # 'exec time' is the SAME (almost) as the 'exec time' above
         print('exec time: ', time.perf_counter() - t)
         print(done_results)
 
-        undone_results = [f.result() for f in undone_futs]
+        undone_results = [f.result() for f in undone_futures]
         # 'exec time' is 5.00+ seconds: the Time of execution of the SLOWEST Task (+ small Overhead).
         # This because we need to wait this additional 1 second when extract the result from the Undone Future
         print('exec time: ', time.perf_counter() - t)
@@ -231,7 +233,7 @@ def using_wait_with_timeout():
         # This is because the ThreadPoolExecutor instance automatically waits for ALL Futures have been completed!
 
 
-# using_wait_with_timeout()
+using_wait_with_timeout()
 print("*" * 50)
 
 
@@ -245,24 +247,30 @@ def using_wait_with_first_completed():
     with cf.ThreadPoolExecutor(
         max_workers=MAX_WORKERS
     ) as executor:
-        futs = [executor.submit(work, d) for d in delays]
+        futures_list = [executor.submit(work, d) for d in delays]
 
-        done_and_undone_futs = cf.wait(
-            futs,
+        done_and_undone_futures = cf.wait(
+            futures_list,
             return_when=cf.FIRST_COMPLETED  # by default 'return_when=cf.ALL_COMPLETED'
         )
-        done_futs = done_and_undone_futs.done
 
         # exec time is 2.00+ seconds: the Time of execution of the FASTEST Task
         print('exec time: ', time.perf_counter() - t)
 
-        done_results = [f.result() for f in done_futs]
+        done_futures, undone_futures = done_and_undone_futures.done, done_and_undone_futures.not_done
+        print(f'Done futures: {done_futures}')
+        print(f'Undone futures: {undone_futures}')
+
+        assert len(done_futures) == 1  # sure that there is only one Future was in 'done' set
+        done_future = next(iter(done_futures), None)
+        print(f'Done future: {done_future}')  # print this Future
+
+        print('Result is: ', done_future.result())
         # 'exec time' is the SAME (almost) as the 'exec time' above
         print('exec time: ', time.perf_counter() - t)
-        print(done_results)
 
         # Here will be the same behaviour as in function 'using_wait_with_timeout':
-        # if you will try to extract the Undone Futures, you will have additional wait time
+        # if you will try to extract the Result from Undone Futures, you will have additional wait time
         # for this, and the final 'exec time' for processing will be 5.00+ seconds
         # (the Time of execution of the SLOWEST Task)
 
@@ -281,40 +289,62 @@ def using_wait_with_first_exception():
     with cf.ThreadPoolExecutor(
         max_workers=MAX_WORKERS
     ) as executor:
-        futs = [executor.submit(raise_exc_with_delay, 1.3)]
-        futs.extend([executor.submit(work, d) for d in delays])
+        futures_list = [executor.submit(raise_exc_with_delay, 1.3)]
+        futures_list.extend([executor.submit(work, d) for d in delays])
 
-        done_and_undone_futs = cf.wait(
-            futs,
+        done_and_undone_futures = cf.wait(
+            futures_list,
             return_when=cf.FIRST_EXCEPTION
         )
-        done_futs, undone_futs = done_and_undone_futs.done, done_and_undone_futs.not_done
-
         # exec time is 1.30+ seconds: the Time of execution of the Task which raises Exception
         print('exec time: ', time.perf_counter() - t)
 
+        done_futures, undone_futures = done_and_undone_futures.done, done_and_undone_futures.not_done
+        print(f'Done futures: {done_futures}')
+        print(f'Undone futures: {undone_futures}')
+
         # Fist Task which was executed raises Exception, and we wait for FIRST_EXCEPTION,
-        # and this Task's Future is placed to the 'done_futs' set
-        done_fut = next(iter(done_futs), None)  # we sure that we have Only 1 Future is in DONE set
-        print(done_fut)  # print this Future
+        # and this Task's Future is placed to the 'done_futures' set
+        assert len(done_futures) == 1  # sure that we have Only 1 Future is in DONE set
+        done_future = next(iter(done_futures), None)
+        print(f'Done future: {done_future}')  # print this Future
+        error = done_future.exception()
+        print('Exception from Future', type(error), error, sep=": ")
 
         # 'exec time' is the SAME (almost) as the 'exec time' above
         print('exec time: ', time.perf_counter() - t)
 
-        undone_futures = done_and_undone_futs.not_done
-        for f in undone_futures:
-            f.cancel()
-
-        print([f.result() for f in undone_futures])
-
-        # done = [f.result() for f in done_and_undone_futs.done]
-        # 'exec time' is the SAME (almost) as the 'exec time' above
-        print('exec time: ', time.perf_counter() - t)
-        # print(done)
-
-        # Here will be the same behaviour as in function 'using_wait_with_timeout':
-        # if you will try to extract the Undone Futures, you will have additional wait time
+        # if you will try to extract the Result from the Undone Futures, you will have additional wait time
         # for this, at the last 'exec time' will be 5.00+ seconds - the Time of execution of the SLOWEST Task
 
 
 # using_wait_with_first_exception()
+print("*" * 50)
+
+
+def futures_cancellation():
+    def infinite_loop(limit_value):
+        counter = 0
+        t = time.perf_counter()
+        while counter < limit_value:
+            counter += 1
+            _ = counter * 10
+        logger.debug(f'exec time: {time.perf_counter() - t}')
+
+    t = time.perf_counter()
+    with cf.ThreadPoolExecutor(
+        max_workers=MAX_WORKERS
+    ) as executor:
+        futures_list = [executor.submit(work, x) for x in (5, 1, 3)]
+        futures_list.append(executor.submit(infinite_loop, 20_000_000))
+        done_and_undone_futures = cf.wait(
+            futures_list,
+            return_when=cf.ALL_COMPLETED
+        )
+        undone_futures_list = done_and_undone_futures.not_done
+        for f in undone_futures_list:
+            f.cancel()
+            print(f'Task running={f.running()}, cancelled={f.cancelled()}, done={f.done()}')
+
+        print([f.result() for f in undone_futures_list])
+
