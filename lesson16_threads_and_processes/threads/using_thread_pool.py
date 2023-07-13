@@ -1,5 +1,4 @@
 import concurrent.futures as cf
-import logging
 import time
 
 from lesson16_threads_and_processes.helpers.custom_logger import setup_logging
@@ -233,7 +232,7 @@ def using_wait_with_timeout():
         # This is because the ThreadPoolExecutor instance automatically waits for ALL Futures have been completed!
 
 
-using_wait_with_timeout()
+# using_wait_with_timeout()
 print("*" * 50)
 
 
@@ -323,28 +322,56 @@ print("*" * 50)
 
 
 def futures_cancellation():
+
     def infinite_loop(limit_value):
+        logger.debug(f"'infinite_loop' start")
         counter = 0
-        t = time.perf_counter()
+        t_ = time.perf_counter()
         while counter < limit_value:
             counter += 1
             _ = counter * 10
-        logger.debug(f'exec time: {time.perf_counter() - t}')
+        logger.debug(f'exec time: {time.perf_counter() - t_}')
 
     t = time.perf_counter()
     with cf.ThreadPoolExecutor(
         max_workers=MAX_WORKERS
     ) as executor:
-        futures_list = [executor.submit(work, x) for x in (5, 1, 3)]
+        futures_list = [executor.submit(work, x) for x in (5, 2, 3)]
+        futures_list.append(executor.submit(raise_exc_with_delay, 1))
         futures_list.append(executor.submit(infinite_loop, 20_000_000))
+
+        futures_list[-1].cancel()
+
         done_and_undone_futures = cf.wait(
             futures_list,
-            return_when=cf.ALL_COMPLETED
+            return_when=cf.FIRST_EXCEPTION
         )
-        undone_futures_list = done_and_undone_futures.not_done
-        for f in undone_futures_list:
-            f.cancel()
+        print('exec time: ', time.perf_counter() - t)
+
+        done_futures = done_and_undone_futures.done
+        print('Done futures: ', done_futures)
+        undone_futures = done_and_undone_futures.not_done
+        print('Undone futures: ', undone_futures)
+
+        results = []
+        for f in done_futures:
+            try:
+                results.append(f.result())
+            except Exception as exc:
+                results.append((type(exc), exc))
+        print(results)
+
+        for f in undone_futures:
+            if f.running():
+                print(f'{f} is running')
+                f.cancel()
             print(f'Task running={f.running()}, cancelled={f.cancelled()}, done={f.done()}')
 
-        print([f.result() for f in undone_futures_list])
+        print(done_futures)
+        print(undone_futures)
 
+        # print('Done results: ', [f.result() for f in done_futures])
+        # print('Undone results: ', [f.result() for f in undone_futures])
+
+
+futures_cancellation()
