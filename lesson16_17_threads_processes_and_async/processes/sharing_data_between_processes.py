@@ -5,7 +5,7 @@ import threading as th
 import time
 from collections import deque
 
-from lesson16_threads_and_processes.helpers.custom_logger import setup_logging
+from lesson16_17_threads_processes_and_async.helpers.custom_logger import setup_logging
 
 logger = setup_logging(__name__)
 

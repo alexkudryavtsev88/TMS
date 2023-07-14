@@ -2,12 +2,12 @@ import concurrent.futures
 import time
 from threading import Thread
 from multiprocessing import Process
-from lesson16_threads_and_processes.helpers.custom_logger import setup_logging
-from lesson16_threads_and_processes.threads.creating_many_threads import (
+from lesson16_17_threads_processes_and_async.helpers.custom_logger import setup_logging
+from lesson16_17_threads_processes_and_async.threads.creating_many_threads import (
     calculate_levenshtein_in_many_threads,
     calculate_levenshtein_in_one_thread
 )
-from lesson16_threads_and_processes.helpers.levenshtein_dist_calculator import LevenshteinDistanceCalculator
+from lesson16_17_threads_processes_and_async.helpers.levenshtein_dist_calculator import LevenshteinDistanceCalculator
 
 
 logger = setup_logging(__name__)

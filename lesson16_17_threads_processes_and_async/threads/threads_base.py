@@ -1,6 +1,6 @@
 from threading import Thread, current_thread
-from lesson16_threads_and_processes.helpers.custom_logger import setup_logging
-from lesson16_threads_and_processes.helpers.helper_functions import work, raise_exc_with_delay
+from lesson16_17_threads_processes_and_async.helpers.custom_logger import setup_logging
+from lesson16_17_threads_processes_and_async.helpers.helper_functions import work, raise_exc_with_delay
 
 
 logger = setup_logging(__name__)

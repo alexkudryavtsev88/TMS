@@ -1,8 +1,8 @@
 import time
 from threading import Thread
-from lesson16_threads_and_processes.helpers.custom_logger import setup_logging
-from lesson16_threads_and_processes.helpers.helper_functions import work
-from lesson16_threads_and_processes.helpers.levenshtein_dist_calculator import LevenshteinDistanceCalculator
+from lesson16_17_threads_processes_and_async.helpers.custom_logger import setup_logging
+from lesson16_17_threads_processes_and_async.helpers.helper_functions import work
+from lesson16_17_threads_processes_and_async.helpers.levenshtein_dist_calculator import LevenshteinDistanceCalculator
 
 
 logger = setup_logging(__name__)

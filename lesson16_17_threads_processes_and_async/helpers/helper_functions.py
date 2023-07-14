@@ -1,6 +1,6 @@
 import random
 
-from lesson16_threads_and_processes.helpers.custom_logger import setup_logging
+from lesson16_17_threads_processes_and_async.helpers.custom_logger import setup_logging
 import time
 
 logger = setup_logging(__name__)
