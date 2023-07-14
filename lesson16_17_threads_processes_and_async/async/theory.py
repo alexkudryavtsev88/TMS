@@ -79,4 +79,34 @@ async def main():
 
 asyncio.run(main())
 
+"""
+Please remember:
+- the function marked with 'async' may not contain any 'await' in its body
+- but if function contains at least one 'await' in its body - this function should
+be defined as 'async' otherwise you will get Syntax error
+- call of ANY Coroutine in you code (any 'async' function) should be written through
+the 'await'. Any I/O operation in your code should be placed into the Coroutine, 
+otherwise, your code will be blocked in some point of time
+"""
 
+"""
+The Event Loop
+
+In few words how the Event Loop works:
+- when you run the code with Coroutines through the 'asyncio.run()' (I remind that this is required)
+the Event Loop "comes into play":
+(NOTE: you should know that Event Loop DOESN'T WORK with Coroutines directly: it wraps the each Coroutine
+to the special object - Task. And then it works with these Tasks)
+- Event Loop creates a Queue of the Tasks to run.
+- Event Loop takes the first Task from Queue (like a 'deque.popleft()'), the Tasks leaves the Queue
+then Event Loop runs this Task
+- When Task is running, the body of underlying Coroutine (the code inside Async function) is executing 
+until it reaches the any code line with 'await' (call of some another Coroutine). At this point 
+the Coroutine do the following:
+-- it execute a call to another Coroutine which places right after the 'await' operator
+-- it saves the internal state of itself (current code line, current values of the local variables, e.t.c)
+-- it gives the execution control back to the Event Loop and suspends
+- The Event Loop schedules a 'callback' for the Coroutine which gave it the execution control
+   (Callback - is special function which will be called when some another function (to which this Callback is related)
+    ended its execution.   
+"""
