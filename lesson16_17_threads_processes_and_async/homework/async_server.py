@@ -52,7 +52,7 @@ class ServerEmulator:
                 reason=f"Call number: {self._calls_count}"
             )
 
-        await asyncio.sleep(0.7)
+        await asyncio.sleep(1)
 
         value = await self._QUEUE.get()
         if thread_name != 'MainThread':
