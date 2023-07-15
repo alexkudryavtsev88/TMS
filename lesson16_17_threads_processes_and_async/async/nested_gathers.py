@@ -7,7 +7,7 @@ MY_RANGE = range(1, 6)
 async def coro(i: int):
     print(f"sleeping {i} seconds")
     await asyncio.sleep(i)
-    # time.sleep(i)
+    # time.sleep(i)  NEVER use time.sleep() in Coroutines! Only asyncio.sleep()
     return i
 
 
