@@ -16,9 +16,9 @@ URL = "http://0.0.0.0"
 PORT = 8080
 HELLO_ENDPOINT = f"{URL}:{PORT}/hello"
 
-
 """
-1. 
+1. Дана функция отправляющая http-запрос, проверяющая статус ответа и возвращающая кортеж,
+где 1 элемент - это имя текущего треда, второй элемент - данные из ответа сервера, преобразованные в dict
 """
 
 
@@ -28,6 +28,22 @@ def send_request():
     data = response.json()
 
     return data['key'], data['value']
+
+"""
+ЗАДАНИЕ:
+1. Конкурентно запустить функцию 50 раз используя Тред Пулл
+2. Ожидать результата выполнения всех запущенных задач 10 секунд
+4. Безопасно (то есть, с обработкой возможных ошибок) извлечь результаты только завершенных задач.
+   Сформировать дикт с именем results_dict, где ключи - это имена тредов, а значения по этим ключам -
+   это соответствующие им дикты (все это возвращает функция send_request).
+   Если результат - это какой-либо exception, то не добавляем его в дикт, а добавляем в отдельный список errors.
+5. Внутри функции 2 раза зафиксиовать время выполнения кода:
+   - первый раз, когда завершили ожидания выполнения задач.
+   - второй раз, после того, как обработали результаты и сформировали results_dict.
+   - вывести на печать эти два времени как 'exec_time_1' и 'exec_time_2'
+   - проверить, что они примерно равны друг другу и что оба времени уж точно не больше 10 секунд!
+6. Вывести на печать полученный results_dict и errors.
+"""
 
 
 async def send_many_requests_in_threads(requests_count):
@@ -63,7 +79,8 @@ async def send_many_requests_in_threads(requests_count):
         return result_dict
 
 """
-2. 
+2. Дана асинхронная функция send_request_async, делающая то же самое, что и send_request,
+только использующая асинхронную библиотеку для отправки http-запросов
 """
 
 
@@ -75,6 +92,17 @@ async def send_request_async():
             data = await resp.json()
 
             return data['key'], data['value']
+
+"""
+ЗАДАНИЕ:
+
+Сделать асинхронную версию предыдущего задания:
+- вместо Тред Пулла использовать asyncio и Корутины (async функции)
+- для запуска корутин использовать asyncio.gather, Timeout в асинхронной версии не нужен!
+- Вместо имени Треда в data['key'] будет возвращаться 'Async_{int}', использовать это в качестве ключей в results_dict
+
+(Все остальные условия аналогичны предыдущему заданию)
+"""
 
 
 async def send_many_requests_async(requests_count):
@@ -121,13 +149,14 @@ REQUESTS_COUNT = 50
 server = run_server(port=PORT)
 
 # 1. Run threaded version
-
+# ...
 
 # 2. Run async version
-asyncio.run(send_many_requests_async(requests_count=REQUESTS_COUNT))
+# ...
 
 
 # 3. Run both and check performance (don't forget to remove 'timeout' from ThreadPool! )
+# ...
 
 # Kill the server
 time.sleep(3)
