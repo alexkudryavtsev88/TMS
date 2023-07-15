@@ -1,6 +1,4 @@
-import concurrent.futures
 import time
-from threading import Thread
 from multiprocessing import Process
 from lesson16_17_threads_processes_and_async.helpers.custom_logger import setup_logging
 from lesson16_17_threads_processes_and_async.threads.creating_many_threads import (
@@ -17,6 +15,7 @@ def calculate_levenshtein_in_many_processes(words: list[tuple[str, str]]):
     logger.warning(f"calculate_levenshtein_in_many_processes: start program ({len(words)} processes)")
     running = []
 
+    # Using multiprocessing
     start_time = time.perf_counter()
     for word_a, word_b in words:
         process = Process(
@@ -29,6 +28,7 @@ def calculate_levenshtein_in_many_processes(words: list[tuple[str, str]]):
     for p in running:
         p.join()
 
+    # using ProcessPoolExecutor
     # with concurrent.futures.ProcessPoolExecutor(max_workers=10) as executor:
     #     futures = [
     #         executor.submit(
@@ -43,7 +43,6 @@ def calculate_levenshtein_in_many_processes(words: list[tuple[str, str]]):
     logger.warning(
         f"calculate_levenshtein_in_many_processes: "
         f"common exec time is {exec_time} ms")
-
 
 
 WORDS = [
