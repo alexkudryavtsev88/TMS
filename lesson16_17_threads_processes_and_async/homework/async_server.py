@@ -1,22 +1,12 @@
 import asyncio
 import json
-import threading
-from dataclasses import dataclass
 import multiprocessing
 
 import logging
-from typing import Callable
 
 from aiohttp import web, web_request
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass(frozen=True)
-class AppHandler:
-    method: str
-    path: str
-    handler: Callable
 
 
 class ServerEmulator:

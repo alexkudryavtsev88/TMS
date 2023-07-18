@@ -186,7 +186,7 @@ server = run_server(port=PORT)
 send_many_requests_in_threads(requests_count=REQUESTS_COUNT)
 
 # 2. Run async version
-asyncio.run(send_many_requests_async(requests_count=REQUESTS_COUNT))
+# asyncio.run(send_many_requests_async(requests_count=REQUESTS_COUNT))
 
 
 # 3. Run both and check performance (don't forget to remove 'timeout' from ThreadPool! )
