@@ -1,5 +1,7 @@
 import concurrent.futures as cf
 import asyncio
+import logging
+import threading
 import time
 
 import aiohttp
@@ -10,11 +12,36 @@ from lesson16_17_threads_processes_and_async.homework.async_server import run_se
 
 
 logger = setup_logging(__name__)
+logging.getLogger('urllib3.connectionpool').setLevel('ERROR')
+logging.getLogger('aiohttp.access').setLevel('ERROR')
 
 
 URL = "http://0.0.0.0"
 PORT = 8080
 HELLO_ENDPOINT = f"{URL}:{PORT}/hello"
+
+
+def verify_exec_time_and_results(
+    t1: float,
+    t2: float,
+    results_dict: dict[str, dict[str, str]],
+    errors_list: list[Exception],
+    expected_results_count: int,
+    expected_errors_count: int
+):
+    print(f'exec time after waiting results: {t1}')
+    print(f'exec time after processing results: {t2}')
+    assert (0 < (t2 - t1) < 1) and t1 < 10 and t2 < 10
+
+    print(f'Results dict: {results_dict}')
+    print(f'Errors: {errors_list}')
+
+    success_count = len(results_dict.keys())
+    assert success_count == expected_results_count
+
+    errors_count = len(errors_list)
+    assert errors_count == expected_errors_count
+
 
 """
 1. Дана функция отправляющая http-запрос, проверяющая статус ответа и возвращающая кортеж,
@@ -23,7 +50,10 @@ HELLO_ENDPOINT = f"{URL}:{PORT}/hello"
 
 
 def send_request():
-    response = requests.get(url=HELLO_ENDPOINT)
+    response = requests.get(
+        url=HELLO_ENDPOINT,
+        params={'requestor': threading.current_thread().name}
+    )
     response.raise_for_status()
     data = response.json()
 
@@ -46,35 +76,40 @@ def send_request():
 """
 
 
-async def send_many_requests_in_threads(requests_count):
+def send_many_requests_in_threads(requests_count):
     t = time.perf_counter()
 
     with cf.ThreadPoolExecutor(
         max_workers=requests_count,
-        thread_name_prefix='RequestorThread'
+        thread_name_prefix='ThreadRequestor'
     ) as executor:
         running_futures = [
-            executor.submit(send_request, i)
-            for i in range(requests_count)
+            executor.submit(send_request)
+            for _ in range(requests_count)
         ]
-        print('exec time: ', time.perf_counter() - t)
-
         done_and_undone_futures = cf.wait(
             running_futures,
             timeout=10,
         )
+        end_t1 = time.perf_counter() - t
 
-        result_dict = {}
+        result_dict, errors = {}, []
         for f in done_and_undone_futures.done:
             try:
                 name, data = f.result()
                 result_dict[name] = data
             except Exception as exc:
-                print(f"ERROR: {exc}")
+                errors.append(exc)
 
-        print('exec time: ', time.perf_counter() - t)
-
-        print(f'Results dict: {result_dict}')
+        end_t2 = time.perf_counter() - t
+        verify_exec_time_and_results(
+            t1=end_t1,
+            t2=end_t2,
+            results_dict=result_dict,
+            errors_list=errors,
+            expected_results_count=requests_count - len(errors),
+            expected_errors_count=int(requests_count / 10)
+        )
 
         return result_dict
 
@@ -84,9 +119,12 @@ async def send_many_requests_in_threads(requests_count):
 """
 
 
-async def send_request_async():
+async def send_request_async(call_number: int):
     async with aiohttp.ClientSession() as session:
-        async with session.get(url=HELLO_ENDPOINT) as resp:
+        async with session.get(
+            url=HELLO_ENDPOINT,
+            params={'requestor': f'AsyncRequestor_{call_number}'}
+        ) as resp:
             resp.raise_for_status()
             await asyncio.sleep(0.7)
             data = await resp.json()
@@ -110,35 +148,30 @@ async def send_many_requests_async(requests_count):
 
     results_list = await asyncio.gather(
         *[
-            send_request_async()
-            for _ in range(requests_count)
+            send_request_async(i)
+            for i in range(requests_count)
         ],
         return_exceptions=True
     )
-    print(f"exec time: {time.perf_counter() - t}")
+    end_t1 = time.perf_counter() - t
 
-    result_dict = {}
-    errors = []
+    result_dict, errors = {}, []
     for item in results_list:
         if isinstance(item, Exception):
-            # print(f"ERROR: {item}")
             errors.append(item)
         else:
             name, data = item
-            # print(name, data)
             result_dict[name] = data
 
-    print('exec time: ', time.perf_counter() - t)
-
-    print(f'Results dict: {result_dict}')
-    print(f"Errors: {errors}")
-
-    actual_results_count = len(result_dict.keys())
-    expected_results_count = requests_count - len(errors)
-
-    assert actual_results_count == expected_results_count, \
-        f"Invalid count: exp {expected_results_count}, " \
-        f"act: {actual_results_count}"
+    end_t2 = time.perf_counter() - t
+    verify_exec_time_and_results(
+        t1=end_t1,
+        t2=end_t2,
+        results_dict=result_dict,
+        errors_list=errors,
+        expected_results_count=requests_count - len(errors),
+        expected_errors_count=int(requests_count / 10)
+    )
 
     return result_dict
 
@@ -150,14 +183,15 @@ server = run_server(port=PORT)
 
 # 1. Run threaded version
 # ...
+send_many_requests_in_threads(requests_count=REQUESTS_COUNT)
 
 # 2. Run async version
-# ...
+asyncio.run(send_many_requests_async(requests_count=REQUESTS_COUNT))
 
 
 # 3. Run both and check performance (don't forget to remove 'timeout' from ThreadPool! )
 # ...
 
 # Kill the server
-time.sleep(3)
+time.sleep(5)
 server.kill()

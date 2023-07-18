@@ -41,8 +41,8 @@ class ServerEmulator:
         logger.info(f"Starting the <{self.name}> at port {self._port}")
         web.run_app(self._app, port=self._port)
 
-    async def hello(self, _: web_request.Request) -> web.Response:
-        thread_name = threading.current_thread().name
+    async def hello(self, request: web_request.Request) -> web.Response:
+        requestor_name = request.query.get('requestor')
 
         self._calls_count += 1
         await self._QUEUE.put(self._calls_count)
@@ -55,16 +55,12 @@ class ServerEmulator:
         await asyncio.sleep(1)
 
         value = await self._QUEUE.get()
-        if thread_name != 'MainThread':
-            key = thread_name
-        else:
-            key = f'Async_{value}'
 
         return web.Response(
             status=200,
             text=json.dumps(
                 {
-                    "key": key,
+                    "key": requestor_name,
                     "value": value
                 }
             ),
