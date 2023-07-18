@@ -126,7 +126,6 @@ async def send_request_async(call_number: int):
             params={'requestor': f'AsyncRequestor_{call_number}'}
         ) as resp:
             resp.raise_for_status()
-            await asyncio.sleep(0.7)
             data = await resp.json()
 
             return data['key'], data['value']
@@ -183,7 +182,7 @@ server = run_server(port=PORT)
 
 # 1. Run threaded version
 # ...
-send_many_requests_in_threads(requests_count=REQUESTS_COUNT)
+# send_many_requests_in_threads(requests_count=REQUESTS_COUNT)
 
 # 2. Run async version
 # asyncio.run(send_many_requests_async(requests_count=REQUESTS_COUNT))

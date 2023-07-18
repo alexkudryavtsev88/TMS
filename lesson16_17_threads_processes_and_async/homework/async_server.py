@@ -45,6 +45,7 @@ class ServerEmulator:
         await asyncio.sleep(1)
 
         value = await self._QUEUE.get()
+        print(f'requestor: {requestor_name}, call count: {value}')
 
         return web.Response(
             status=200,
