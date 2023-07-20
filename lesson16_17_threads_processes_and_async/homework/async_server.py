@@ -4,7 +4,13 @@ import multiprocessing
 
 import logging
 
+# import requests
 from aiohttp import web, web_request
+import http
+
+# from queue import Queue
+# from multiprocessing import Queue
+# from asyncio import Queue
 
 logger = logging.getLogger(__name__)
 
@@ -22,19 +28,34 @@ class ServerEmulator:
         # app
         self._app = web.Application()
         self._app.router.add_route(
-            method='GET',
+            method=http.HTTPMethod.GET,
             path='/hello',
             handler=self.hello,
         )
+        # self._app.router.add_route(
+        #     method='GET',
+        #     path='/hello_world',
+        #     handler=self.hello_world,
+        # )
 
     def start(self):
         logger.info(f"Starting the <{self.name}> at port {self._port}")
         web.run_app(self._app, port=self._port)
 
+    # def hello_world(self, _: web_request.Request):
+    #     print('Hello world!')
+    #
+    #     return web.Response(
+    #         status=200,
+    #         text="Hello world!",
+    #         content_type='application/json'
+    #     )
+
     async def hello(self, request: web_request.Request) -> web.Response:
         requestor_name = request.query.get('requestor')
 
         self._calls_count += 1
+        # print(self._calls_count)
         await self._QUEUE.put(self._calls_count)
 
         if self._calls_count % self._threshold == 0:

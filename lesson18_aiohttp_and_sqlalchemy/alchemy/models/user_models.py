@@ -13,8 +13,10 @@ class User(Base):
     gender = Column(String(6), nullable=False)
     nationality = Column(String, nullable=True)
     posts = relationship(
-        "Post", backref="user", passive_deletes=True, lazy="joined", innerjoin=True
-    )  #
+        "Post",
+        backref="user",
+        passive_deletes=True
+    )   # lazy="joined", innerjoin=True
     comments = relationship("Comment", backref="user", passive_deletes=True)
     likes = relationship("Like", backref="user", passive_deletes=True)
 

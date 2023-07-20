@@ -1,52 +1,95 @@
 import asyncio
 import logging
-import time
 
 import config
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import async_session, create_async_engine
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.asyncio import AsyncSession
-# from sqlalchemy.ext.asyncio import async_sessionmaker
 
-
-# from typing import Any
+from sqlalchemy import select
+from lesson18_aiohttp_and_sqlalchemy.alchemy.models.user_models import Base, User
 
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-async def init_all_connections():
-    logger.info("Initializing the DB connections...")
-
-    connector = DatabaseConnector
-    connector.configure_session()
-
-    start = time.perf_counter()
-    poll_size = config.DB_CONFIG[f"{config.PREFIX}pool_size"]
-    await asyncio.gather(*[connector.check() for _ in range(poll_size)])
-    logger.info(
-        "All DB connections are initialized (%0.2f sec)", time.perf_counter() - start
-    )
-
-
 class DatabaseConnector:
-    SESSION = None
     CHECK_QUERY = text("SELECT 1")
 
-    @classmethod
-    def configure_session(cls):
-        engine = create_async_engine(config.DB_URL)
-        cls.SESSION = AsyncSession(engine)
+    def __init__(self, db_url):
+        self._url = db_url
+        self._engine = None
+        self._session = None
+        self._base = Base
 
-    @classmethod
-    async def check(cls):
-        async with cls.SESSION as session:
-            await session.execute(cls.CHECK_QUERY)
+    def connect(self):
+        engine = create_async_engine(self._url, echo=True)
+        self._engine = engine
+        self._session = AsyncSession(engine)
 
     async def healthcheck(self):
-        await self.check()
+        async with self._session as session:
+            await session.execute(self.CHECK_QUERY)
 
-    async def create_tables(self, meta):
-        meta.create_all()
+    async def execute(self, query):
+        async with self._session as s:
+            async with s.begin():
+                return await s.execute(query)
+
+    # async def create_tables(self):
+    #     # meta.create_all()
+    #     Base.metadata.create_all(self._engine)
+
+
+# async def run():
+#     conn = DatabaseConnector(config.DB_URL)
+#     conn.connect()
+#
+#     query = select(User).where(User.id == 1)
+#     result = await conn.execute(query)
+#     result_final = result.scalar_one_or_none()
+#     print(result_final, type(result), sep=", ")
+
+
+engine = create_async_engine(config.DB_URL)
+session = AsyncSession(engine)
+
+
+async def check_db():
+    async with session:
+        await session.execute(text("SELECT 1"))
+
+
+async def get_users_by_ids(users_ids: list[int]):
+    query = select(User).where(User.id.in_(users_ids))
+
+    async with session:
+        results = await session.execute(query)
+        results = results.scalars().all()
+        print([type(i) for i in results])
+        names = [item.name for item in results]
+        print(f"names: {names}")
+
+
+async def get_user_by_id(user_id: int):
+    query = select(User).where(User.id == user_id)
+
+    async with session:
+        results = await session.execute(query)
+        result = results.unique().scalar_one_or_none()
+        print(f"Result: {result}")
+        if result:
+            print(
+                f"User name: {result.name}, "
+                f"user age: {result.age}"
+            )
+
+
+async def update_user_by_id(user_id: int, **data):
+    async with session:
+        async with session.begin():
+
+
+
+asyncio.run(get_user_by_id(user_id=1))

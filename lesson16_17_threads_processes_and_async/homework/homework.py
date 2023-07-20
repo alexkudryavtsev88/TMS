@@ -105,5 +105,5 @@ server = run_server(port=PORT)
 # ...
 
 # Kill the server
-time.sleep(3)
-server.kill()
+# time.sleep(3)
+# server.kill()
