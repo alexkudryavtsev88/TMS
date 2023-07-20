@@ -15,8 +15,10 @@ class User(Base):
     posts = relationship(
         "Post",
         backref="user",
-        passive_deletes=True
-    )   # lazy="joined", innerjoin=True
+        passive_deletes=True,
+        lazy="joined",
+        innerjoin=True
+    )
     comments = relationship("Comment", backref="user", passive_deletes=True)
     likes = relationship("Like", backref="user", passive_deletes=True)
 

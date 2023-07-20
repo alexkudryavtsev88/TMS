@@ -15,5 +15,4 @@ async def get_users():
 
 
 if __name__ == "__main__":
-    # asyncio.run(init_all_connections())
     asyncio.run(get_users())

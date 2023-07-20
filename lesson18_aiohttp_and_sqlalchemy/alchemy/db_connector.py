@@ -14,82 +14,84 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-class DatabaseConnector:
-    CHECK_QUERY = text("SELECT 1")
+class DatabaseWorker:
 
     def __init__(self, db_url):
         self._url = db_url
         self._engine = None
         self._session = None
-        self._base = Base
 
     def connect(self):
-        engine = create_async_engine(self._url, echo=True)
-        self._engine = engine
-        self._session = AsyncSession(engine)
+        self._engine = create_async_engine(self._url, echo=True)
+        self._session = AsyncSession(self._engine)
 
-    async def healthcheck(self):
-        async with self._session as session:
-            await session.execute(self.CHECK_QUERY)
+    async def check_db(self):
+        async with self._session as s:
+            await s.execute(text("SELECT 1"))
 
-    async def execute(self, query):
+    async def get_user_by_id(self, user_id: int):
+        async with self._session as s:
+            return await self._get_user_by_id(s, user_id)
+
+    async def get_users_by_ids(self, users_ids: list[int]):
+        async with self._session as s:
+            return self._get_users_by_ids(s, users_ids)
+
+    @staticmethod
+    async def _get_user_by_id(session_, user_id: int):
+        query = select(User).where(User.id == user_id)
+
+        results = await session_.execute(query)
+        result = results.unique().scalar_one_or_none()
+
+        return result
+
+    @staticmethod
+    async def _get_users_by_ids(session_, users_ids: list[int]):
+        query = select(User).where(User.id.in_(users_ids))
+
+        results = await session_.execute(query)
+        result = results.unique().scalars().all()
+
+        return result
+
+    async def update_user_by_id(self, user_id: int, **data):
+        if not data:
+            print(f"No data to update user with Id {user_id}")
+            return
+
         async with self._session as s:
             async with s.begin():
-                return await s.execute(query)
+                user = await self._get_user_by_id(s, user_id=user_id)
 
-    # async def create_tables(self):
-    #     # meta.create_all()
-    #     Base.metadata.create_all(self._engine)
+                if user is None:
+                    print(f"No user with Id: {user_id}")
+                    return
 
+                if (name := data.get("name")) is not None:
+                    user.name = name
+                if (age := data.get("age")) is not None:
+                    user.age = age
+                if (gender := data.get("gender")) is not None:
+                    user.gender = gender
+                if (nationality := data.get("nationality")) is not None:
+                    user.nationality = nationality
 
-# async def run():
-#     conn = DatabaseConnector(config.DB_URL)
-#     conn.connect()
-#
-#     query = select(User).where(User.id == 1)
-#     result = await conn.execute(query)
-#     result_final = result.scalar_one_or_none()
-#     print(result_final, type(result), sep=", ")
-
-
-engine = create_async_engine(config.DB_URL)
-session = AsyncSession(engine)
+                return "Ok"
 
 
-async def check_db():
-    async with session:
-        await session.execute(text("SELECT 1"))
+async def update_user_nationality_and_check_updates(user_id):
+    db_worker = DatabaseWorker(config.DB_URL)
+    db_worker.connect()
+    await db_worker.check_db()
+
+    update_result = await db_worker.update_user_by_id(user_id=user_id, nationality='Canada')
+    assert update_result.lower() == 'ok'
+    real_user = await db_worker.get_user_by_id(user_id=user_id)
+    print(real_user)
+    assert real_user.nationality == 'Canada'
 
 
-async def get_users_by_ids(users_ids: list[int]):
-    query = select(User).where(User.id.in_(users_ids))
-
-    async with session:
-        results = await session.execute(query)
-        results = results.scalars().all()
-        print([type(i) for i in results])
-        names = [item.name for item in results]
-        print(f"names: {names}")
-
-
-async def get_user_by_id(user_id: int):
-    query = select(User).where(User.id == user_id)
-
-    async with session:
-        results = await session.execute(query)
-        result = results.unique().scalar_one_or_none()
-        print(f"Result: {result}")
-        if result:
-            print(
-                f"User name: {result.name}, "
-                f"user age: {result.age}"
-            )
-
-
-async def update_user_by_id(user_id: int, **data):
-    async with session:
-        async with session.begin():
-
-
-
-asyncio.run(get_user_by_id(user_id=1))
+asyncio.run(
+    update_user_nationality_and_check_updates(user_id=1)
+)
