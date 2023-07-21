@@ -3,9 +3,12 @@ import random
 import string
 from multiprocessing import Process
 
+from sqlalchemy import select
+
 from lesson18_19_sqlalchemy import config
 from lesson18_19_sqlalchemy.models import Post, User
 from lesson18_19_sqlalchemy.db_worker import DatabaseWorker
+
 
 import traceback
 
@@ -99,9 +102,24 @@ def create_two_same_users_concurrently(db_worker: DatabaseWorker):
         p.join()
 
 
+async def execute_select_with_join(db_worker: DatabaseWorker, query):
+    async with db_worker._session as s:
+        result = await s.execute(query)
+
+        results = result.all()
+        print(results)
+
+
 if __name__ == '__main__':
     database_worker = DatabaseWorker(config.DB_URL)
     database_worker.connect()
+
+    asyncio.run(
+        execute_select_with_join(
+            database_worker,
+            query=select(User.name, Post.title).join(Post).where(User.id == 1)
+        )
+    )
 
     ''' update User nationality '''
     # asyncio.run(

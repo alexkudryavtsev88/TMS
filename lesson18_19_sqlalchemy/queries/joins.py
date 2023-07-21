@@ -1,8 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.orm.strategy_options import joinedload
 
-from lesson18_19_sqlalchemy import config
-from lesson18_19_sqlalchemy.db_worker import DatabaseWorker
 from lesson18_19_sqlalchemy.models import Comment, Post, User
 
 users = User
@@ -160,11 +158,10 @@ FROM users JOIN comments AS comments_1 ON users.id = comments_1.user_id
 """
 
 
-async def main():
-    database_worker = DatabaseWorker(config.DB_URL)
-    database_worker.connect()
+"""
+To run any query from this module - just import it in 'play_with_db.py' and then run 
+using 'execute_select_with_join() module function and pass your query as argument.
 
-
-if __name__ == '__main__':
-    database_worker = DatabaseWorker(config.DB_URL)
-    database_worker.connect()
+IMPORTANT NOTE: When you execute some SELECT Query like 'select(User.id, User.name, Post.title).join()...'
+DON'T USE .scalars() call on the Result! Just call .all() on result to retrieve the Rows!
+"""

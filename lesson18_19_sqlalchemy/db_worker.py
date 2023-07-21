@@ -9,9 +9,6 @@ from asyncpg.exceptions import UniqueViolationError
 from lesson18_19_sqlalchemy.models import User, Post
 
 
-# logger = logging.getLogger(__name__)
-
-
 class DatabaseWorker:
 
     def __init__(self, db_url):
@@ -27,12 +24,38 @@ class DatabaseWorker:
         async with self._session as s:
             await s.execute(text("SELECT 1"))
 
-    async def execute_select(self, query):
+    async def execute_any_select(self, query, scalars: bool = True, one_result: bool = False):
         """
         Use to execute any SELECT query
+        - if 'scalars' is True: call '.scalars()' on result of session.execute()
+          this is useful when SELECT query contains the single object and
+          query expected result is 1+ rows:
+
+             query = select(User).where(User.id.in_(list_of_ids))
+
+        - if 'one_result' is True, call '.scalar_one_or_none()' on result
+          this is useful when SELECT query contains the single object and
+          query expected result is only one row
+
+             query = select(User).where(User.id == some_user_id)
+
+        - if both 'scalars' and 'one_result' if False, then just call '.all()'
+        on result, this is useful when query contains several columns in 'select'
+        like:
+
+            query = select(User.name, User.age).where(User.id == some_user_id)
+
         """
         async with self._session as s:
-            return (await s.execute(query)).scalars().all()
+            result = (await s.execute(query)).unique()
+
+            if scalars and not one_result:
+                return result.scalars().all()
+
+            if one_result:
+                return result.scalar_one_or_none()
+
+            return result.all()
 
     @staticmethod
     async def _get_user_by_id_from_session(session: AsyncSession, user_id: int):
