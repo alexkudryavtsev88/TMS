@@ -1,5 +1,5 @@
-from models.user_models import Like, Post, User
 from sqlalchemy import desc, func, select
+from lesson18_19_sqlalchemy.models import Like, Post, User
 
 # ======================== GROUP BY =================================== #
 

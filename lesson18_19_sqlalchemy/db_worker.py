@@ -1,15 +1,15 @@
-# import asyncio
-# import logging
-# import random
-# import string
-#
-# import config
+import sqlalchemy.exc
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from sqlalchemy import select, delete
+from asyncpg.exceptions import UniqueViolationError
+
 from lesson18_19_sqlalchemy.models import User, Post
+
+
+# logger = logging.getLogger(__name__)
 
 
 class DatabaseWorker:
@@ -27,15 +27,15 @@ class DatabaseWorker:
         async with self._session as s:
             await s.execute(text("SELECT 1"))
 
-    async def execute_any_query(self, query):
+    async def execute_select(self, query):
+        """
+        Use to execute any SELECT query
+        """
         async with self._session as s:
-            async with s.begin():
-                result = await s.execute(query)
-
-                return result
+            return (await s.execute(query)).scalars().all()
 
     @staticmethod
-    async def _get_user_by_id_from_session(session_, user_id: int):
+    async def _get_user_by_id_from_session(session: AsyncSession, user_id: int):
         """
         This method builds query, executes it through *session* which it got as argument
         and returns result as single User object or None if there is no such id in the
@@ -43,23 +43,45 @@ class DatabaseWorker:
         """
         query = select(User).where(User.id == user_id)
 
-        results = await session_.execute(query)
-        result = results.unique().scalar_one_or_none()
+        result = await session.execute(query)
+        result = result.unique().scalar_one_or_none()
+
+        """
+        - 'unique()' call on result is required 
+          (because we have lazy="joined" flag specified in User class)
+        - 'scalar_one_or_none()' returns a single User entity or None, if there are NO results by search criteria. 
+           Posts related to the retrieved User are available through the 'User.posts' attribute 
+           (because we have lazy="joined" flag specified in User class)
+        - Please note, that retrieved User object is attached to the *session*. 
+          When we update the User object latter within the SAME session, the ORM is automatically
+          executes 'UPDATE users SET ...' query
+        """
 
         return result
 
     @staticmethod
-    async def _get_users_by_ids_from_session(session_, users_ids: list[int]):
+    async def _get_users_by_ids_from_session(session: AsyncSession, users_ids: list[int]):
         """
         This method builds query, executes it through *session*
         and returns result
         """
         query = select(User).where(User.id.in_(users_ids))
 
-        results = await session_.execute(query)
-        result = results.unique().scalars().all()
+        results = await session.execute(query)
+        users_list = results.unique().scalars().all()
 
-        return result
+        """
+        - 'unique()' call on result is required 
+          (because we have lazy="joined" flag specified in User class)
+        - Call of chain '.scalars().all()' returns a list of User entities
+           Posts related to the retrieved Users are available through the 'User.posts' attribute 
+           (because we have lazy="joined" flag specified in User class)
+        - Please note, that retrieved User objects are attached to the *session*. 
+          When we update some of them latter within the SAME session, the ORM is automatically
+          executes 'UPDATE users SET ...' query
+        """
+
+        return users_list
 
     async def get_user_by_id(self, user_id: int):
         """
@@ -101,6 +123,10 @@ class DatabaseWorker:
             return
 
         async with self._session as s:
+            """
+            starting the new Transaction using 'begin()' context manager
+            to avoid making 'commit / rollback' directly later
+            """
             async with s.begin():
                 user = await self._get_user_by_id_from_session(s, user_id=user_id)
                 """
@@ -137,3 +163,42 @@ class DatabaseWorker:
                 """
 
                 return "Ok"
+
+    async def add_new_user(self, user: User):
+        async with self._session as s:
+            async with s.begin():
+                result = await self._add_user(s, user=user)
+
+                return result
+
+    @staticmethod
+    async def _add_user(session: AsyncSession, user: User):
+        try:
+            """
+            create SAVEPOINT for started Transaction
+            """
+            async with session.begin_nested():
+                session.add(user)  # attach User object to the session
+                return "Ok"
+
+        except sqlalchemy.exc.IntegrityError as exc:
+            """
+            Here we check that underlying Exception is
+            the UniqueViolationError which occurs when
+            the UNIQUE constraint was Violated: in this specific case,
+            it may occur upon adding the 2 SAME Users
+            """
+            match exc.orig and exc.orig.__cause__:
+                case UniqueViolationError() as exc:
+                    """
+                    Please NOTE that here we only print the 
+                    Exception's traceback without raising 
+                    the Exception itself!
+                    """
+                    print(repr(exc))
+                case _:
+                    raise exc
+
+            # Transaction state will be RELEASED OR ROLLED BACK to the SAVEPOINT
+
+

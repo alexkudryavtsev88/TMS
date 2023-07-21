@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "users_personal_info_unique" ON users (name, age, gender, nationality);

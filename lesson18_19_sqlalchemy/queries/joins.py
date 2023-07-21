@@ -1,12 +1,9 @@
-# from executor import QueryExecutor
-# from models.user_models import Comment, Post, User
-import asyncio
-
 from sqlalchemy import select
 from sqlalchemy.orm.strategy_options import joinedload
-from lesson18_19_sqlalchemy.models import Comment, Post, User
+
+from lesson18_19_sqlalchemy import config
 from lesson18_19_sqlalchemy.db_worker import DatabaseWorker
-from lesson18_19_sqlalchemy.config import DB_URL
+from lesson18_19_sqlalchemy.models import Comment, Post, User
 
 users = User
 posts = Post
@@ -141,28 +138,20 @@ join_3_tb_outer_1_where = join_3_tb_outer_1.where(users.name == "Alex")
 
 """RELATIONSHIP LOADING TECHNIQUES"""
 
-worker = DatabaseWorker(DB_URL)
-
-"""When we want to retrieve a single User entity and have access to the related Posts:"""
+"""When we want to retrieve a single User entity and have access to his related Comments:"""
 
 joinedload_query = (
     select(User).options(joinedload(User.comments, innerjoin=True)).where(User.id == 1)
 )
 
 """
-NOTE: we can add kwarg *lazy='joined'* in the appropriate *relationship()* field of User class
-and NOT user *options(joinedload(...)) in Query directly in this case*
+NOTE: you can add kwarg *lazy='joined'* in the appropriate *relationship* field of User class
+and NOT user *options(joinedload(...)) in Query directly in this case
 """
 
-""" WORKFLOW """
+""" 
+WORKFLOW
 
-
-async def load_with_join():
-    result = await worker.execute_any_query(joinedload_query)
-    return result
-
-
-"""
 - When executing the Query described above the ORM JOINS the User and Comment tables implicitly:
 
 SELECT users.id, users.name, users.age, users.gender, users.nationality,
@@ -171,21 +160,11 @@ FROM users JOIN comments AS comments_1 ON users.id = comments_1.user_id
 """
 
 
-async def get_scalar_one():
-    result = await load_with_join()
-    user = result.unique().scalar_one()
-    print(f"User: {user}")
-    for idx, com in enumerate(user.comments, start=1):
-        print(f"Comment {idx}: {com}")
+async def main():
+    database_worker = DatabaseWorker(config.DB_URL)
+    database_worker.connect()
 
 
-"""
-- 'unique()' call on Result is required
-- 'scalar_one_or_none()' call returns a single 'User' entity or None, if there are no results by search criteria. Posts
-  related to the retrieved User are available through the 'User.posts' attribute.
-- also retrieved User object is attached to the Session. When we update the User object attributes, ORM is automatically
-  execute 'UPDATE users SET ...' query
-"""
-
-
-asyncio.run(get_scalar_one())
+if __name__ == '__main__':
+    database_worker = DatabaseWorker(config.DB_URL)
+    database_worker.connect()

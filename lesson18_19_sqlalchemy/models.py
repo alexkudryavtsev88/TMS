@@ -16,7 +16,7 @@ class User(Base):
         "Post",
         backref="user",
         passive_deletes=True,
-        lazy="joined",
+        lazy="joined",  # used for automatic join 'users' and 'posts' tables
         innerjoin=True
     )
     comments = relationship("Comment", backref="user", passive_deletes=True)
