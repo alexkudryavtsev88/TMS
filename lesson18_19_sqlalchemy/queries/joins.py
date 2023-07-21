@@ -1,7 +1,12 @@
-from executor import QueryExecutor
-from models.user_models import Comment, Post, User
+# from executor import QueryExecutor
+# from models.user_models import Comment, Post, User
+import asyncio
+
 from sqlalchemy import select
 from sqlalchemy.orm.strategy_options import joinedload
+from lesson18_19_sqlalchemy.models import Comment, Post, User
+from lesson18_19_sqlalchemy.db_worker import DatabaseWorker
+from lesson18_19_sqlalchemy.config import DB_URL
 
 users = User
 posts = Post
@@ -136,7 +141,7 @@ join_3_tb_outer_1_where = join_3_tb_outer_1.where(users.name == "Alex")
 
 """RELATIONSHIP LOADING TECHNIQUES"""
 
-executor = QueryExecutor()
+worker = DatabaseWorker(DB_URL)
 
 """When we want to retrieve a single User entity and have access to the related Posts:"""
 
@@ -153,7 +158,7 @@ and NOT user *options(joinedload(...)) in Query directly in this case*
 
 
 async def load_with_join():
-    result = await executor.exec_query(joinedload_query)
+    result = await worker.execute_any_query(joinedload_query)
     return result
 
 
@@ -183,4 +188,4 @@ async def get_scalar_one():
 """
 
 
-# asyncio.run(get_scalar_one())
+asyncio.run(get_scalar_one())
