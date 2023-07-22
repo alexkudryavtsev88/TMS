@@ -123,10 +123,7 @@ async def execute_select_with_join(db_worker: DatabaseWorker):
     result = await db_worker.execute_any_select(q, scalars=True, one_result=False)
     print(result)
 
-    # q2 = joins.joinedload_query_user_and_comments
-    q2 = (
-        select(User).join(Comment).where(User.id == 1)
-    )
+    q2 = joins.select_user_with_comments
     result = await db_worker.execute_any_select(q2, scalars=True, one_result=True)
     print(result)
     print(result.comments)
@@ -175,11 +172,11 @@ if __name__ == '__main__':
     # create_two_same_users_concurrently(database_worker)
 
     ''' Test 'join' queries '''
-    asyncio.run(
-        execute_select_with_join(
-            database_worker,
-        )
-    )
+    # asyncio.run(
+    #     execute_select_with_join(
+    #         database_worker,
+    #     )
+    # )
 
     ''' Test 'grouping' queries '''
     # asyncio.run(

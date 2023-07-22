@@ -134,9 +134,7 @@ WHERE users.name = %s
 join_3_tb_outer_1_where = join_3_tb_outer_1.where(users.name == "Alex")
 
 
-""" 
-  RELATIONSHIP LOADING TECHNIQUES
-"""
+"""  RELATIONSHIP LOADING TECHNIQUE  """
 
 """
 If you use "join" Queries as described above, for example: 
@@ -145,7 +143,7 @@ If you use "join" Queries as described above, for example:
  
 When you call .all() on Result of this Query, your result will be as in pure SQL:
 you have a list of "rows", where: 
-- each "row" is a Tuple of appropriate values
+- each "row" is a Tuple of appropriate columns values
 - User's name and age will be repeated in each "row"
 
   Output: 
@@ -163,11 +161,10 @@ If you will use query like this:
 and then you call .scalar_one_or_none() on the Query result and
 then you tries to get access to the User comments:
 
+  print(my_user.comments)
   
-  comments = User.comments
-  
-You will get DetachedInstanceError because 'comments' relations 
-don't work in this case.
+You will get *DetachedInstanceError* because the 'comments' relations 
+don't work in this case!
  
 To avoid this and get your result as you expect you should use the "JoinedLoad" technique:
 """
@@ -186,11 +183,11 @@ WORKFLOW:
 
 - When executing the Query described above the ORM JOINS the User and Comment tables implicitly:
 
-SELECT users.id, users.name, users.age, users.gender, users.nationality,
-comments_1.id AS id_1, comments_1.title, comments_1.user_id, comments_1.post_id
-FROM users JOIN comments AS comments_1 ON users.id = comments_1.user_id
+    SELECT users.id, users.name, users.age, users.gender, users.nationality,
+    comments_1.id AS id_1, comments_1.title, comments_1.user_id, comments_1.post_id
+    FROM users JOIN comments AS comments_1 ON users.id = comments_1.user_id
 
-- You will have access to User's comments via 'User.comments' relationship fields
+- Then you will have access to User's comments via 'User.comments' relationship fields :)
 """
 
 
