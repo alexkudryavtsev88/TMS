@@ -3,8 +3,10 @@ import random
 import string
 from multiprocessing import Process
 
+from sqlalchemy import select
+
 from lesson18_19_sqlalchemy import config
-from lesson18_19_sqlalchemy.models import Post, User
+from lesson18_19_sqlalchemy.models import Post, User, Comment
 from lesson18_19_sqlalchemy.db_worker import DatabaseWorker
 from lesson18_19_sqlalchemy.queries import joins
 from lesson18_19_sqlalchemy.queries import groupings
@@ -121,7 +123,10 @@ async def execute_select_with_join(db_worker: DatabaseWorker):
     result = await db_worker.execute_any_select(q, scalars=True, one_result=False)
     print(result)
 
-    q2 = joins.joinedload_query_user_and_comments
+    # q2 = joins.joinedload_query_user_and_comments
+    q2 = (
+        select(User).join(Comment).where(User.id == 1)
+    )
     result = await db_worker.execute_any_select(q2, scalars=True, one_result=True)
     print(result)
     print(result.comments)
@@ -170,11 +175,11 @@ if __name__ == '__main__':
     # create_two_same_users_concurrently(database_worker)
 
     ''' Test 'join' queries '''
-    # asyncio.run(
-    #     execute_select_with_join(
-    #         database_worker,
-    #     )
-    # )
+    asyncio.run(
+        execute_select_with_join(
+            database_worker,
+        )
+    )
 
     ''' Test 'grouping' queries '''
     # asyncio.run(

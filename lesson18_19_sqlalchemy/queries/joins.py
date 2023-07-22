@@ -139,16 +139,48 @@ join_3_tb_outer_1_where = join_3_tb_outer_1.where(users.name == "Alex")
 """
 
 """
- When we want to retrieve a single User entity and have access to his related Comments:
+If you use "join" Queries as described above, for example: 
+
+  query = select(User.name, User.age, Post.title).join(Post).where(User.id == 1)
+ 
+When you call .all() on Result of this Query, your result will be as in pure SQL:
+you have a list of "rows", where: 
+- each "row" is a Tuple of appropriate values
+- User's name and age will be repeated in each "row"
+
+  Output: 
+ 
+  [('Alex', 34, 'Alex 1st post'), ('Alex', 34, 'Alex 2nd post')]
+
+But there is a more real case when we want to:
+ - get a SINGLE Object from DB, NOT a list of rows
+ - have access to this Object's Relations via appropriate fields
+ 
+If you will use query like this:
+
+  query = select(User).join(Comment).where(User.id == 1)
+  
+and then you call .scalar_one_or_none() on the Query result and
+then you tries to get access to the User comments:
+
+  
+  comments = User.comments
+  
+You will get DetachedInstanceError because 'comments' relations 
+don't work in this case.
+ 
+To avoid this and get your result as you expect you should use the "JoinedLoad" technique:
 """
 
-joinedload_query_user_and_comments = (
-    select(User).options(joinedload(User.comments, innerjoin=True)).where(User.id == 1)
+select_user_with_comments = (
+    select(User).options(
+        joinedload(User.comments, innerjoin=True)
+    ).where(User.id == 1)
 )
 
 """
-NOTE: you can add *lazy='joined'* in the appropriate *relationship* field of User class
-and NOT use *options(joinedload(...)) in Query directly in this case
+OR you can add *lazy='joined'* in the appropriate *relationship* field of User class
+and NOT use *options(joinedload(...)) directly in query 
 
 WORKFLOW:
 
@@ -157,13 +189,12 @@ WORKFLOW:
 SELECT users.id, users.name, users.age, users.gender, users.nationality,
 comments_1.id AS id_1, comments_1.title, comments_1.user_id, comments_1.post_id
 FROM users JOIN comments AS comments_1 ON users.id = comments_1.user_id
+
+- You will have access to User's comments via 'User.comments' relationship fields
 """
 
 
 """
-To run any query from this module - just import it in 'play_with_db.py' and then run 
+NOTE: To run any query from this module - just import it in 'play_with_db.py' and then run 
 using 'execute_select_with_join() module function and pass your query as argument.
-
-IMPORTANT NOTE: When you execute some SELECT Query like 'select(User.id, User.name, Post.title).join()...'
-DON'T USE .scalars() call on the Result! Just call .all() on result to retrieve the Rows!
 """
