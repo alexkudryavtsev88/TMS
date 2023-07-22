@@ -24,7 +24,7 @@ class DatabaseWorker:
         async with self._session as s:
             await s.execute(text("SELECT 1"))
 
-    async def execute_any_select(self, query, scalars: bool = True, one_result: bool = False):
+    async def execute_any_select(self, query, scalars: bool = False, one_result: bool = False):
         """
         Use to execute any SELECT query
         - if 'scalars' is True: call '.scalars()' on result of session.execute()

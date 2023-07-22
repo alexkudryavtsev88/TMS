@@ -3,11 +3,11 @@ import random
 import string
 from multiprocessing import Process
 
-from sqlalchemy import select
-
 from lesson18_19_sqlalchemy import config
 from lesson18_19_sqlalchemy.models import Post, User
 from lesson18_19_sqlalchemy.db_worker import DatabaseWorker
+from lesson18_19_sqlalchemy.queries import joins
+from lesson18_19_sqlalchemy.queries import groupings
 
 
 import traceback
@@ -54,6 +54,7 @@ async def update_user_post_and_check_updates(db_worker: DatabaseWorker, user_id:
         assert added_post.description == "Added by SQLAlchemy"
         assert added_post.user_id == user_id
     except Exception as exc:
+        # here we only print Exception's traceback!
         traceback.print_exception(exc)
     finally:
         """
@@ -102,24 +103,54 @@ def create_two_same_users_concurrently(db_worker: DatabaseWorker):
         p.join()
 
 
-async def execute_select_with_join(db_worker: DatabaseWorker, query):
-    async with db_worker._session as s:
-        result = await s.execute(query)
+async def execute_select_with_join(db_worker: DatabaseWorker):
+    """
+    Test the query from 'queries/joins.py' module
 
-        results = result.all()
-        print(results)
+    Use 'scalars=False, one_result=False' for all queries from module
+    except the joinedload query!
+
+    - when you execute some Query like 'select(User.name, User.age, Post.title)'
+    and then you call the .scalars().all() on result: you will get the values from first column only!!!
+    - 'one_result = True' should be used only when the query expectedly returns a single row
+
+
+    Examples:
+    """
+    q = joins.join_3_tb_inner_1
+    result = await db_worker.execute_any_select(q, scalars=True, one_result=False)
+    print(result)
+
+    q2 = joins.joinedload_query_user_and_comments
+    result = await db_worker.execute_any_select(q2, scalars=True, one_result=True)
+    print(result)
+    print(result.comments)
+
+
+async def execute_select_with_grouping(db_worker: DatabaseWorker):
+    """
+    Test the query from 'queries/groupings.py' module
+
+    Use 'scalars=False, one_result=False' for all queries from module!
+
+    Examples:
+    """
+    q1 = groupings.get_likes_count_by_posts()
+    result1 = await db_worker.execute_any_select(q1, scalars=False, one_result=False)
+    print(result1)
+
+    q2 = groupings.get_likes_count_by_posts_and_users_with_having(likes_count=2)
+    result2 = await db_worker.execute_any_select(q2, scalars=False, one_result=False)
+    print(result2)
+
+    q3 = groupings.get_min_max_age_partition_by_gender()
+    result3 = await db_worker.execute_any_select(q3, scalars=False, one_result=False)
+    print(result3)
 
 
 if __name__ == '__main__':
     database_worker = DatabaseWorker(config.DB_URL)
     database_worker.connect()
-
-    asyncio.run(
-        execute_select_with_join(
-            database_worker,
-            query=select(User.name, Post.title).join(Post).where(User.id == 1)
-        )
-    )
 
     ''' update User nationality '''
     # asyncio.run(
@@ -135,7 +166,22 @@ if __name__ == '__main__':
     NOTE: DON'T run previous code lines simultaneously!
     """
 
-    ''' run as standard function '''
+    ''' Try to add 2 same users '''
     # create_two_same_users_concurrently(database_worker)
+
+    ''' Test 'join' queries '''
+    # asyncio.run(
+    #     execute_select_with_join(
+    #         database_worker,
+    #     )
+    # )
+
+    ''' Test 'grouping' queries '''
+    # asyncio.run(
+    #     execute_select_with_grouping(
+    #         db_worker=database_worker
+    #     )
+    # )
+
 
 

@@ -134,21 +134,23 @@ WHERE users.name = %s
 join_3_tb_outer_1_where = join_3_tb_outer_1.where(users.name == "Alex")
 
 
-"""RELATIONSHIP LOADING TECHNIQUES"""
+""" 
+  RELATIONSHIP LOADING TECHNIQUES
+"""
 
-"""When we want to retrieve a single User entity and have access to his related Comments:"""
+"""
+ When we want to retrieve a single User entity and have access to his related Comments:
+"""
 
-joinedload_query = (
+joinedload_query_user_and_comments = (
     select(User).options(joinedload(User.comments, innerjoin=True)).where(User.id == 1)
 )
 
 """
-NOTE: you can add kwarg *lazy='joined'* in the appropriate *relationship* field of User class
-and NOT user *options(joinedload(...)) in Query directly in this case
-"""
+NOTE: you can add *lazy='joined'* in the appropriate *relationship* field of User class
+and NOT use *options(joinedload(...)) in Query directly in this case
 
-""" 
-WORKFLOW
+WORKFLOW:
 
 - When executing the Query described above the ORM JOINS the User and Comment tables implicitly:
 
