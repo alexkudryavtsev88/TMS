@@ -25,7 +25,7 @@ DTTM_FMT = '%Y-%m-%dT%H:%M:%SZ'
 """
 
 
-async def update_user_posts_and_comments(post_id: int, new_comment: Comment):
+async def update_post_comments(post_id: int, new_comment: Comment):
     first_post_comment_updated_text = f"(updated at {datetime.datetime.now().strftime(DTTM_FMT)})"
     post_has_no_comments = False
 
@@ -86,7 +86,9 @@ async def update_user_posts_and_comments(post_id: int, new_comment: Comment):
         comments = (await get_post_by_id(session)).comments
 
         assert len(comments) >= 1
+
         if post_has_no_comments:
+            # added comment is only one comment related to our Post
             added_comment = comments[0]
         else:
             assert comments[0].title.endswith(first_post_comment_updated_text)
@@ -109,14 +111,37 @@ async def update_user_posts_and_comments(post_id: int, new_comment: Comment):
 (В конце также проверка на то, что обновления зафиксировались)
 """
 
-POST_ID = 2
-asyncio.run(
-    update_user_posts_and_comments(
-        post_id=POST_ID,
-        new_comment=Comment(
-            title=f"I'm New Comment(created at {datetime.datetime.now().strftime(DTTM_FMT)})",
-            user_id=None,
-            post_id=POST_ID
+
+async def add_one_like_to_posts_with_no_likes():
+
+    # async def get_post_by_id(session_):
+    #     """
+    #     Get Post object from DB
+    #     """
+    #     return (
+    #         await session_.execute(
+    #             select(Post).where(Post.id == post_id)
+    #         )
+    #     ).unique().scalar_one_or_none()
+
+    engine = create_async_engine(config.DB_URL, echo=True)
+    async with AsyncSession(engine) as session:
+        async with session.begin():
+            # TODO
+            pass
+
+if __name__ == '__main__':
+
+    # first Task
+    POST_ID = 2
+
+    asyncio.run(
+        update_post_comments(
+            post_id=POST_ID,
+            new_comment=Comment(
+                title=f"I'm New Comment(created at {datetime.datetime.now().strftime(DTTM_FMT)})",
+                user_id=None,
+                post_id=POST_ID
+            )
         )
     )
-)

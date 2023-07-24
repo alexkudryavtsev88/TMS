@@ -44,7 +44,7 @@ class Post(Base):
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
     comments = relationship("Comment", passive_deletes=True, lazy="joined", order_by="Comment.id.asc()")
-    likes = relationship("Like", passive_deletes=True)
+    likes = relationship("Like", passive_deletes=True, lazy="joined")
 
     def __repr__(self):
         return (
