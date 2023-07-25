@@ -133,7 +133,7 @@ select u.name, p.title, p.description, count(l.id) as likes_count
     from users u
     join posts p on u.id = p.user_id
     join likes l on u.id = l.user_id
-    group by u.name, p.id
+    group by u.id, p.id
     order by likes_count desc;
 
 
@@ -173,7 +173,7 @@ select u.name, p.title, p.description, count(l.id) as likes_count
     from posts p
     join likes l on p.id = l.post_id
     join users u on u.id = p.user_id
-    group by u.name, p.id
+    group by u.id, p.id
     order by likes_count desc;
 
 -- name |     title     |                 description                  | likes_count
@@ -194,7 +194,7 @@ select u.name, p.title, p.description, count(l.id) as likes_count
     from posts p
     join likes l on p.id = l.post_id
     join users u on u.id = p.user_id
-    group by u.name, p.id
+    group by u.id, p.id
     having count(l.id) > 2;
 
 -- Когда нам нужно указать условие для фильтра, и фильтром является результат агрегатной функции, то вместо

@@ -3,9 +3,9 @@ import datetime
 
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, delete
+from sqlalchemy import select, func
 
-from lesson18_19_sqlalchemy.models import Post, User, Comment
+from lesson18_19_sqlalchemy.models import Post, User, Comment, Like
 from lesson18_19_sqlalchemy import config
 
 
@@ -99,9 +99,6 @@ async def update_post_comments(post_id: int, new_comment: Comment):
         assert added_comment.user_id == new_comment.user_id
 
 
-
-
-
 """
 2. Написать асинк функцию, которая:
 - не принимает аргументов
@@ -114,34 +111,85 @@ async def update_post_comments(post_id: int, new_comment: Comment):
 
 async def add_one_like_to_posts_with_no_likes():
 
-    # async def get_post_by_id(session_):
-    #     """
-    #     Get Post object from DB
-    #     """
-    #     return (
-    #         await session_.execute(
-    #             select(Post).where(Post.id == post_id)
-    #         )
-    #     ).unique().scalar_one_or_none()
+    async def get_all_users(session_):
+        """
+        Get Users objects from DB
+        """
+        return (
+            await session_.execute(
+                select(User)
+            )
+        ).unique().scalars().all()
+
+    async def get_likes_stats(session_, user_ids, post_ids):
+        """
+        Get likes statistics
+        """
+        query = (
+            select(
+                User.id,
+                Post.id,
+                func.count(Like.id).label("likes_cnt"),
+            )
+            .join_from(Post, Like, isouter=True)
+            .join_from(Post, User, User.id == Post.user_id)
+            .where(
+                User.id.in_(user_ids),
+                Post.id.in_(post_ids),
+            )
+            .group_by(User.id, Post.id)
+        )
+        return (await session_.execute(query)).all()
+
+    user_with_no_likes = []
+    posts_with_no_likes = []
 
     engine = create_async_engine(config.DB_URL, echo=True)
     async with AsyncSession(engine) as session:
         async with session.begin():
-            # TODO
-            pass
+            for user in await get_all_users(session):
+                print(f"User: {user}")
+                for post in user.posts:
+                    print(f"User Post: {post}")
+                    print(f"Post Likes: {post.likes}")
+
+                    if not post.likes:
+                        # Just save the ids of Users/Posts where NO likes found
+                        user_with_no_likes.append(user.id)
+                        posts_with_no_likes.append(post.id)
+                        # Add new Like to Post's Likes
+                        post.likes.append(
+                            Like(
+                                user_id=user.id,
+                                post_id=post.id
+                            )
+                        )
+
+        if user_with_no_likes and posts_with_no_likes:
+            records_after_update = await get_likes_stats(
+                session, user_with_no_likes, posts_with_no_likes
+            )
+
+            for record in records_after_update:
+                u_id, p_id, likes_cnt = record
+                print(f"User id: {u_id}, Post id: {p_id}, Likes count: {likes_cnt}")
+                assert likes_cnt == 1
+
 
 if __name__ == '__main__':
 
     # first Task
     POST_ID = 2
 
-    asyncio.run(
-        update_post_comments(
-            post_id=POST_ID,
-            new_comment=Comment(
-                title=f"I'm New Comment(created at {datetime.datetime.now().strftime(DTTM_FMT)})",
-                user_id=None,
-                post_id=POST_ID
-            )
-        )
-    )
+    # asyncio.run(
+    #     update_post_comments(
+    #         post_id=POST_ID,
+    #         new_comment=Comment(
+    #             title=f"I'm New Comment(created at {datetime.datetime.now().strftime(DTTM_FMT)})",
+    #             user_id=None,
+    #             post_id=POST_ID
+    #         )
+    #     )
+    # )
+
+    # asyncio.run(add_one_like_to_posts_with_no_likes())
