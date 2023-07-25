@@ -149,6 +149,8 @@ async def add_one_like_to_posts_with_no_likes():
         async with session.begin():
             for user in await get_all_users(session):
                 print(f"User: {user}")
+                # we iterate over 'user.posts' because we need to know the Post ID
+                # when we will add new Likes
                 for post in user.posts:
                     print(f"User Post: {post}")
                     print(f"Post Likes: {post.likes}")
@@ -157,6 +159,7 @@ async def add_one_like_to_posts_with_no_likes():
                         # Just save the ids of Users/Posts where NO likes found
                         user_with_no_likes.append(user.id)
                         posts_with_no_likes.append(post.id)
+
                         # Add new Like to Post's Likes
                         post.likes.append(
                             Like(
@@ -192,4 +195,4 @@ if __name__ == '__main__':
     #     )
     # )
 
-    # asyncio.run(add_one_like_to_posts_with_no_likes())
+    asyncio.run(add_one_like_to_posts_with_no_likes())
