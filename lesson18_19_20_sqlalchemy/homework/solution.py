@@ -5,8 +5,8 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 
-from lesson18_19_sqlalchemy.models import Post, User, Comment, Like
-from lesson18_19_sqlalchemy import config
+from lesson18_19_20_sqlalchemy.models import Post, User, Comment, Like
+from lesson18_19_20_sqlalchemy import config
 
 
 DTTM_FMT = '%Y-%m-%dT%H:%M:%SZ'

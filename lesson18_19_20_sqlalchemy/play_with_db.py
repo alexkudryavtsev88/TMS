@@ -3,13 +3,11 @@ import random
 import string
 from multiprocessing import Process
 
-from sqlalchemy import select
-
-from lesson18_19_sqlalchemy import config
-from lesson18_19_sqlalchemy.models import Post, User, Comment
-from lesson18_19_sqlalchemy.db_worker import DatabaseWorker
-from lesson18_19_sqlalchemy.queries import joins
-from lesson18_19_sqlalchemy.queries import groupings
+from lesson18_19_20_sqlalchemy import config
+from lesson18_19_20_sqlalchemy.models import Post, User
+from lesson18_19_20_sqlalchemy.db_worker import DatabaseWorker
+from lesson18_19_20_sqlalchemy.queries import joins
+from lesson18_19_20_sqlalchemy.queries import groupings
 
 
 import traceback

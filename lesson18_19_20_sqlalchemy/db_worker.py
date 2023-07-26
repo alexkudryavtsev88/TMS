@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, delete
 from asyncpg.exceptions import UniqueViolationError
 
-from lesson18_19_sqlalchemy.models import User, Post
+from lesson18_19_20_sqlalchemy.models import User, Post
 
 
 class DatabaseWorker:

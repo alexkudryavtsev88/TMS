@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm.strategy_options import joinedload
 
-from lesson18_19_sqlalchemy.models import Comment, Post, User
+from lesson18_19_20_sqlalchemy.models import Comment, Post, User
 
 users = User
 posts = Post
