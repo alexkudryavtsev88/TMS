@@ -211,4 +211,15 @@ except KeyError as err:
     raise MyCustomException(f"Dict {dict_} doesnt contain key {key}") from err
 
 
+"""
+Print Exceptions
+"""
 
+def divide_byzero():
+    x = {}
+    return x[1]
+
+try:
+    divide_byzero()
+except Exception as exc:
+    print(repr(exc))
