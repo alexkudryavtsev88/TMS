@@ -98,13 +98,49 @@ class Server:
         )
 
     async def add_comment(self, request: web_request.Request) -> web.Response:
-        # error_msg = (
-        #     f"Cannot add a Comment to Post '{post_title}', '{post_description}' "
-        #     f"because this Post doesn't exist OR is NOT related to "
-        #     f"the User '{user_name}', {user_age}"
-        # )
-        # result = self._db_connector.add_comment()
-        pass
+        data = await request.json()
+
+        user_name = data["user"]["name"]
+        user_age = data["user"]["age"]
+        post_title = data["post_title"]
+        post_description = data["post_description"]
+        comment_title = data["comment"]
+
+        operation_status = await self._db_connector.add_comment(
+            user_name=user_name,
+            user_age=user_age,
+            post_title=post_title,
+            post_description=post_description,
+            comment_title=comment_title
+        )
+        match operation_status:
+            case OperationStatus.SUCCESS:
+                http_status = HTTPStatus.OK
+                message = (
+                    f"Comment '{comment_title}' successfully added"
+                    f"to Post '{post_title}', '{post_description}'"
+                    f"from User {user_name}' (age: {user_age})"
+                )
+            case OperationStatus.NOT_EXIST:
+                http_status = HTTPStatus.NOT_FOUND
+                message = (
+                    f"Cannot add a Comment to Post '{post_title}', '{post_description}' "
+                    f"because this Post doesn't exist OR is NOT related to "
+                    f"the User {user_name}, (age: {user_age})"
+                )
+            case _:
+                raise UnknownOperationStatusError(f"{operation_status}")
+
+        return web.Response(
+            status=http_status,
+            text=json.dumps(
+                {
+                    "operation_status": operation_status.value,
+                    "message": message
+                }
+            ),
+            content_type=self._content_type
+        )
 
     async def add_like(self, request: web_request.Request) -> web.Response:
         # error_msg = (
