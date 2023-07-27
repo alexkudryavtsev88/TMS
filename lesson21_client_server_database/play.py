@@ -12,7 +12,6 @@ async def main():
     user = User(
         name="Alex",
         age=34,
-        gender="male",
     )
     client = Client(server_url=SERVER_URL)
     result = await client.add_post(user, "New Post 3", "I'm a New Post 3!")

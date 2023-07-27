@@ -28,8 +28,3 @@ class YearMonth(Enum):
 # print(month.value)
 
 
-class EvenOrOdd(str, Enum):
-    ODD = "ODD"
-    EVEN = "EVEN"
-
-

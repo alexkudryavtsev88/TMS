@@ -29,16 +29,16 @@ class Server:
             path='/post_add',
             handler=self.add_post,
         )
-        # self._app.router.add_route(
-        #     method=HTTPMethod.POST,
-        #     path='/comment_add',
-        #     handler=self.add_comment,
-        # )
-        # self._app.router.add_route(
-        #     method=HTTPMethod.POST,
-        #     path='/like_add',
-        #     handler=self.add_like,
-        # )
+        self._app.router.add_route(
+            method=HTTPMethod.POST,
+            path='/comment_add',
+            handler=self.add_comment,
+        )
+        self._app.router.add_route(
+            method=HTTPMethod.POST,
+            path='/like_add',
+            handler=self.add_like,
+        )
 
         # db
         self._db_connector = DatabaseConnector(db_url=DB_URL)
