@@ -6,8 +6,6 @@ from enum import Enum
 class User:
     name: str
     age: int
-    gender: str
-    nationality: str = "belarus"
 
     def to_dict(self):
         return asdict(self)
@@ -17,3 +15,21 @@ class OperationStatus(str, Enum):
     SUCCESS = "SUCCESS"
     NOT_EXIST = "NOT EXIST"
     NOT_UNIQUE = "NOT UNIQUE"
+
+
+class YearMonth(Enum):
+    JANUARY = 1
+    FEBRUARY = 2
+    MARCH = 3
+
+# month = YearMonth.JANUARY
+# print(type(month))
+# print(month.name)
+# print(month.value)
+
+
+class EvenOrOdd(str, Enum):
+    ODD = "ODD"
+    EVEN = "EVEN"
+
+
