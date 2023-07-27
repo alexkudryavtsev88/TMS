@@ -1,3 +1,4 @@
+import http
 import json
 import multiprocessing
 import time
@@ -66,8 +67,8 @@ class Server:
             case OperationStatus.SUCCESS:
                 http_status = HTTPStatus.OK
                 message = (
-                    f"Post '{post_title}', '{post_description}' successfully "
-                    f"added to User {user_name}' (age: {user_age})"
+                    f"Post '{post_title}', '{post_description}' has been "
+                    f" successfully added to User {user_name}' (age: {user_age})"
                 )
             case OperationStatus.NOT_EXIST:
                 http_status = HTTPStatus.NOT_FOUND
@@ -86,16 +87,7 @@ class Server:
             case _:
                 raise UnknownOperationStatusError(f"{operation_status}")
 
-        return web.Response(
-            status=http_status,
-            text=json.dumps(
-                {
-                    "operation_status": operation_status.value,
-                    "message": message
-                }
-            ),
-            content_type=self._content_type
-        )
+        return self._get_response(http_status, operation_status, message)
 
     async def add_comment(self, request: web_request.Request) -> web.Response:
         data = await request.json()
@@ -117,7 +109,7 @@ class Server:
             case OperationStatus.SUCCESS:
                 http_status = HTTPStatus.OK
                 message = (
-                    f"Comment '{comment_title}' successfully added"
+                    f"Comment '{comment_title}' has been successfully added"
                     f"to Post '{post_title}', '{post_description}'"
                     f"from User {user_name}' (age: {user_age})"
                 )
@@ -131,25 +123,59 @@ class Server:
             case _:
                 raise UnknownOperationStatusError(f"{operation_status}")
 
+        return self._get_response(http_status, operation_status, message)
+
+    async def add_like(self, request: web_request.Request) -> web.Response:
+        data = await request.json()
+
+        user_name = data["user"]["name"]
+        user_age = data["user"]["age"]
+        post_title = data["post_title"]
+        post_description = data["post_description"]
+
+        operation_status = await self._db_connector.add_like(
+            user_name=user_name,
+            user_age=user_age,
+            post_title=post_title,
+            post_description=post_description,
+        )
+
+        match operation_status:
+            case OperationStatus.SUCCESS:
+                http_status = HTTPStatus.OK
+                message = (
+                    f"Like has been successfully added"
+                    f"to Post '{post_title}', '{post_description}'"
+                    f"from User {user_name} (age: {user_age})"
+                )
+            case OperationStatus.NOT_EXIST:
+                http_status = HTTPStatus.NOT_FOUND
+                message = (
+                    f"Cannot add a Like to Post '{post_title}', '{post_description}' "
+                    f"because this Post doesn't exist OR is NOT related to "
+                    f"the User {user_name} (age: {user_age})"
+                )
+            case _:
+                raise UnknownOperationStatusError(f"{operation_status}")
+
+        return self._get_response(http_status, operation_status, message)
+
+    def _get_response(
+        self,
+        http_status: http.HTTPStatus,
+        op_status: OperationStatus,
+        message: str
+    ) -> web.Response:
         return web.Response(
             status=http_status,
             text=json.dumps(
                 {
-                    "operation_status": operation_status.value,
+                    "operation_status": op_status.value,
                     "message": message
                 }
             ),
             content_type=self._content_type
         )
-
-    async def add_like(self, request: web_request.Request) -> web.Response:
-        # error_msg = (
-        #     f"Cannot add a Like to Post '{post_title}', '{post_description}' "
-        #     f"because this Post doesn't exist OR is NOT related to "
-        #     f"the User '{user_name}', {user_age}"
-        # )
-        # result = self._db_connector.add_like()
-        pass
 
     """
     Methods bellow are not implemented yet
