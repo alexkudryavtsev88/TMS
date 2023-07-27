@@ -1,47 +1,69 @@
 import aiohttp
 import yarl
-from http import HTTPMethod
+from http import HTTPMethod, HTTPStatus
 
 from lesson21_client_server_database.structures import User
-from lesson21_client_server_database.server import run_server
+
+
+class ClientRequestError(Exception):
+    """
+    raises when request fails with non-200 status code
+    """
+
+    context: dict = {}
+
+    def __init__(self, **kwargs):
+        self.context.update(kwargs)
+        message = str(self.context)
+        super().__init__(message)
 
 
 class Client:
 
-    def __init__(self, server_url: str, user: User):
+    def __init__(self, server_url: str):
         self._server_url = yarl.URL(server_url)
         self._session = aiohttp.ClientSession()
-        self._user = user
 
     async def _send_request(self, method: HTTPMethod, url: yarl.URL, data: dict[str, str]):
         async with self._session as session:
-            async with session.request(method, url, **data) as resp:
-                resp.raise_for_status()
-                return await resp.json()
+            async with session.request(method, url, json=data) as resp:
+                try:
+                    resp_data = await resp.json()
+                except ValueError as exc:
+                    raise ClientRequestError(
+                        cause_exception=exc
+                    )
+                else:
+                    if resp.status != HTTPStatus.OK:
+                        raise ClientRequestError(
+                            context=resp_data
+                        )
 
-    async def add_post(self, post_title: str, post_description: str):
+                    return resp_data
+
+    async def add_post(self, user: User, post_title: str, post_description: str):
         url = self._server_url / "post_add"
         data = {
-            "user": self._user.to_dict(),
+            "user": user.to_dict(),
             "post_title": post_title,
             "post_description": post_description
         }
         return await self._send_request(HTTPMethod.POST, url, data)
 
-    async def add_comment(self, post_title: str, post_description: str, comment_title: str):
+    async def add_comment(self, user: User, post_title: str, post_description: str, comment_title: str):
         url = self._server_url / "comment_add"
         data = {
-            "user": self._user.to_dict(),
+            "user": user.to_dict(),
             "post_title": post_title,
             "post_description": post_description,
             "comment_title": comment_title,
         }
         return await self._send_request(HTTPMethod.POST, url, data)
 
-    async def add_like(self, post_title: str, post_description: str):
+    async def add_like(self, user: User, post_title: str, post_description: str):
         url = self._server_url / "like_add"
         data = {
-            "user": self._user.to_dict(),
+            "user": user.to_dict(),
             "post_title": post_title,
             "post_description": post_description,
         }
@@ -66,6 +88,3 @@ class Client:
     def delete_like(self, post_title: str):
         pass
 
-
-if __name__ == '__main__':
-    run_server()

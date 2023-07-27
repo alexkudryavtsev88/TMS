@@ -1,24 +1,12 @@
-import asyncio
 import json
-import logging
 import multiprocessing
-import sys
+import time
 
 from aiohttp import web, web_request
 from http import HTTPMethod, HTTPStatus
 from lesson21_client_server_database.db.connector import DatabaseConnector
 from lesson21_client_server_database.db.config import DB_URL
 from lesson21_client_server_database.structures import OperationStatus
-
-
-logging.basicConfig(
-    format="%(asctime)s.%(msecs)03d %(levelname)s "
-           "[%(name)s:%(funcName)s] -> %(message)s",
-    datefmt="%Y-%m-%d,%H:%M:%S",
-    stream=sys.stdout,
-    level=logging.DEBUG
-)
-logger = logging.getLogger(__name__)
 
 
 class UnknownOperationStatusError(Exception):
@@ -56,9 +44,8 @@ class Server:
         self._db_connector = DatabaseConnector(db_url=DB_URL)
 
     def start(self):
-        logger.info(f"Starting the <{self.name}> at port {self._port}")
+        print(f"Starting the <{self.name}> at port {self._port}")
         self._db_connector.connect()
-        # await self._db_connector.check_db()
         web.run_app(self._app, port=self._port)
 
     async def add_post(self, request: web_request.Request) -> web.Response:
@@ -148,12 +135,17 @@ class Server:
         pass
 
 
-def run_server(port: int = 8000):
+def run_server(port):
     def _start_server():
         server = Server(port=port)
         server.start()
 
     proc = multiprocessing.Process(target=_start_server)
     proc.start()
+    time.sleep(2)
 
     return proc
+
+
+if __name__ == '__main__':
+    run_server(8000)
