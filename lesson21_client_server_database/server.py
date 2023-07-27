@@ -1,5 +1,7 @@
+import asyncio
 import json
 import logging
+import multiprocessing
 import sys
 
 from aiohttp import web, web_request
@@ -53,10 +55,10 @@ class Server:
         # db
         self._db_connector = DatabaseConnector(db_url=DB_URL)
 
-    async def start(self):
+    def start(self):
         logger.info(f"Starting the <{self.name}> at port {self._port}")
         self._db_connector.connect()
-        await self._db_connector.check_db()
+        # await self._db_connector.check_db()
         web.run_app(self._app, port=self._port)
 
     async def add_post(self, request: web_request.Request) -> web.Response:
@@ -144,3 +146,14 @@ class Server:
 
     async def delete_like(self, request: web_request.Request):
         pass
+
+
+def run_server(port: int = 8000):
+    def _start_server():
+        server = Server(port=port)
+        server.start()
+
+    proc = multiprocessing.Process(target=_start_server)
+    proc.start()
+
+    return proc

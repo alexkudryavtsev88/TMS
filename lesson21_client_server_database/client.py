@@ -1,7 +1,9 @@
-from lesson21_client_server_database.structures import User
 import aiohttp
 import yarl
 from http import HTTPMethod
+
+from lesson21_client_server_database.structures import User
+from lesson21_client_server_database.server import run_server
 
 
 class Client:
@@ -63,3 +65,7 @@ class Client:
 
     def delete_like(self, post_title: str):
         pass
+
+
+if __name__ == '__main__':
+    run_server()

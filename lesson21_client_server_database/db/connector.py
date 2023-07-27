@@ -169,19 +169,19 @@ class DatabaseConnector:
                 return OperationStatus.SUCCESS
 
 
-async def main():
-    conn = DatabaseConnector(config.DB_URL)
-    conn.connect()
-    await conn.check_db()
-
-    result = await conn.add_like(
-        user_name="Alex",
-        user_age=34,
-        post_title="Last Alex post",
-        post_description="I'm added by SqlAlchemy!",
-        # comment_title="Last Alex comment(2)"
-    )
-    print(result)
-
-if __name__ == '__main__':
-    asyncio.run(main())
+# async def main():
+#     conn = DatabaseConnector(config.DB_URL)
+#     conn.connect()
+#     await conn.check_db()
+#
+#     result = await conn.add_like(
+#         user_name="Alex",
+#         user_age=34,
+#         post_title="Last Alex post",
+#         post_description="I'm added by SqlAlchemy!",
+#         # comment_title="Last Alex comment(2)"
+#     )
+#     print(result)
+#
+# if __name__ == '__main__':
+#     asyncio.run(main())
