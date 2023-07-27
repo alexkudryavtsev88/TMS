@@ -1,3 +1,4 @@
+import json
 import logging
 import sys
 
@@ -5,8 +6,8 @@ from aiohttp import web, web_request
 from http import HTTPMethod, HTTPStatus
 from lesson21_client_server_database.db.connector import DatabaseConnector
 from lesson21_client_server_database.db.config import DB_URL
+from lesson21_client_server_database.structures import OperationStatus
 
-from typing import Any
 
 logging.basicConfig(
     format="%(asctime)s.%(msecs)03d %(levelname)s "
@@ -18,11 +19,18 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+class UnknownOperationStatusError(Exception):
+    """
+    raises when DatabaseConnector returns unexpected status
+    """
+
+
 class Server:
 
     def __init__(self, port: int = 8000):
         self.name = self.__class__.__name__
         self._port = port
+        self._content_type = 'application/json'
 
         # app
         self._app = web.Application()
@@ -32,9 +40,14 @@ class Server:
             handler=self.add_post,
         )
         # self._app.router.add_route(
-        #     method='GET',
-        #     path='/hello_world',
-        #     handler=self.hello_world,
+        #     method=HTTPMethod.POST,
+        #     path='/comment_add',
+        #     handler=self.add_comment,
+        # )
+        # self._app.router.add_route(
+        #     method=HTTPMethod.POST,
+        #     path='/like_add',
+        #     handler=self.add_like,
         # )
 
         # db
@@ -46,26 +59,88 @@ class Server:
         await self._db_connector.check_db()
         web.run_app(self._app, port=self._port)
 
-    async def add_post(self, request: web_request.Request):
-        result = self._db_connector.add_post()
+    async def add_post(self, request: web_request.Request) -> web.Response:
+        data = await request.json()
 
-    async def add_comment(self, request: web_request.Request):
-        result = self._db_connector.add_comment()
+        user_name = data["user"]["name"]
+        user_age = data["user"]["age"]
+        post_title = data["post_title"]
+        post_description = data["post_description"]
 
-    async def add_like(self, request: web_request.Request):
-        result = self._db_connector.add_like()
+        operation_status = await self._db_connector.add_post(
+            user_name=user_name,
+            user_age=user_age,
+            post_title=post_title,
+            post_description=post_description
+        )
+        match operation_status:
+            case OperationStatus.SUCCESS:
+                http_status = HTTPStatus.OK
+                message = (
+                    f"Post '{post_title}', '{post_description}' successfully "
+                    f"added to User {user_name}' (age: {user_age})"
+                )
+            case OperationStatus.NOT_EXIST:
+                http_status = HTTPStatus.NOT_FOUND
+                message = (
+                    f"Cannot add a Post '{post_title}', '{post_description}' "
+                    f"to User {user_name} (age: {user_age}) "
+                    f"because this User doesn't exist!"
+                )
+            case OperationStatus.NOT_UNIQUE:
+                http_status = HTTPStatus.FORBIDDEN
+                message = (
+                    f"Cannot add a Post '{post_title}', '{post_description}' "
+                    f"to User {user_name} (age: {user_age}) "
+                    f"because this Post is already exist!"
+                )
+            case _:
+                raise UnknownOperationStatusError(f"{operation_status}")
 
-    # async def edit_post(self, post_title: str, edit_data: dict[str, str]):
-    #     pass
-    #
-    # async def edit_comment(self, comment_title: str):
-    #     pass
-    #
-    # def delete_post(self, post_title: str):
-    #     pass
-    #
-    # def delete_comment(self, comment_title: str):
-    #     pass
-    #
-    # def delete_like(self, post_title: str):
-    #     pass
+        return web.Response(
+            status=http_status,
+            text=json.dumps(
+                {
+                    "operation_status": operation_status.value,
+                    "message": message
+                }
+            ),
+            content_type=self._content_type
+        )
+
+    async def add_comment(self, request: web_request.Request) -> web.Response:
+        # error_msg = (
+        #     f"Cannot add a Comment to Post '{post_title}', '{post_description}' "
+        #     f"because this Post doesn't exist OR is NOT related to "
+        #     f"the User '{user_name}', {user_age}"
+        # )
+        # result = self._db_connector.add_comment()
+        pass
+
+    async def add_like(self, request: web_request.Request) -> web.Response:
+        # error_msg = (
+        #     f"Cannot add a Like to Post '{post_title}', '{post_description}' "
+        #     f"because this Post doesn't exist OR is NOT related to "
+        #     f"the User '{user_name}', {user_age}"
+        # )
+        # result = self._db_connector.add_like()
+        pass
+
+    """
+    Methods bellow are not implemented yet
+    """
+
+    async def edit_post(self, request: web_request.Request):
+        pass
+
+    async def edit_comment(self, request: web_request.Request):
+        pass
+
+    async def delete_post(self, request: web_request.Request):
+        pass
+
+    async def delete_comment(self, request: web_request.Request):
+        pass
+
+    async def delete_like(self, request: web_request.Request):
+        pass

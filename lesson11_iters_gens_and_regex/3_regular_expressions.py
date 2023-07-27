@@ -65,3 +65,16 @@ print(re.sub('user', 'resu', user_email))
 
 assert re.sub(regex_email_pattern, '12345', user_email) == '12345'
 assert re.sub(r'[a-z]', '0', user_email) == '0000@00000.000'
+
+
+"""
+DUPLICATE_NUM_PATTERN = re.compile(r"\([0-9]{1,3}\)$")
+
+def update_duplicate_number(text_: str):
+    if (duplicate_num_match := DUPLICATE_NUM_PATTERN.search(text_)) is None:
+        return f"{text_}(1)"
+
+    num_str = duplicate_num_match.group().lstrip("(").rstrip(")")
+
+    return text_.replace(num_str, f"{int(num_str) + 1}")
+"""

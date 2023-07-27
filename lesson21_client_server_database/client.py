@@ -21,16 +21,18 @@ class Client:
         url = self._server_url / "post_add"
         data = {
             "user": self._user.to_dict(),
-            "title": post_title,
-            "description": post_description
+            "post_title": post_title,
+            "post_description": post_description
         }
         return await self._send_request(HTTPMethod.POST, url, data)
 
-    async def add_comment(self, comment_title: str):
+    async def add_comment(self, post_title: str, post_description: str, comment_title: str):
         url = self._server_url / "comment_add"
         data = {
             "user": self._user.to_dict(),
-            "title": comment_title,
+            "post_title": post_title,
+            "post_description": post_description,
+            "comment_title": comment_title,
         }
         return await self._send_request(HTTPMethod.POST, url, data)
 
@@ -43,17 +45,21 @@ class Client:
         }
         return await self._send_request(HTTPMethod.POST, url, data)
 
-    # async def edit_post(self, post_title: str, edit_data: dict[str, str]):
-    #     pass
-    #
-    # async def edit_comment(self, comment_title: str):
-    #     pass
-    #
-    # def delete_post(self, post_title: str):
-    #     pass
-    #
-    # def delete_comment(self, comment_title: str):
-    #     pass
-    #
-    # def delete_like(self, post_title: str):
-    #     pass
+    """
+    Methods bellow are not implemented yet
+    """
+
+    async def edit_post(self, post_title: str, edit_data: dict[str, str]):
+        pass
+
+    async def edit_comment(self, comment_title: str):
+        pass
+
+    def delete_post(self, post_title: str):
+        pass
+
+    def delete_comment(self, comment_title: str):
+        pass
+
+    def delete_like(self, post_title: str):
+        pass

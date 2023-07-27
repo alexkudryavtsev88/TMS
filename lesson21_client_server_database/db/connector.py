@@ -1,3 +1,4 @@
+import asyncio
 from typing import Collection
 
 import sqlalchemy.exc
@@ -8,8 +9,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, delete
 from asyncpg.exceptions import UniqueViolationError
 
+from lesson21_client_server_database.db import config
 from lesson21_client_server_database.db.models import User, Post, Comment, Like
-from lesson21_client_server_database.structures import Status
+from lesson21_client_server_database.structures import OperationStatus
 
 
 class DatabaseConnector:
@@ -36,10 +38,15 @@ class DatabaseConnector:
             await s.execute(text("SELECT 1"))
 
     @staticmethod
-    async def _get_user(session: AsyncSession, user_name: str, user_age: int) -> User | None:
+    async def _get_user(
+        session: AsyncSession,
+        user_name: str,
+        user_age: int
+    ) -> User | None:
         return (
             await session.execute(
-                select(User).where(
+                select(User)
+                .where(
                     User.name == user_name,
                     User.age == user_age
                 )
@@ -57,7 +64,9 @@ class DatabaseConnector:
 
         return (
             await session.execute(
-                select(Post).where(
+                select(Post)
+                .join(User)
+                .where(
                     User.name == user_name,
                     User.age == user_age,
                     Post.title == post_title,
@@ -66,37 +75,43 @@ class DatabaseConnector:
             )
         ).unique().scalar_one_or_none()
 
+    @staticmethod
+    async def _add_post_avoid_conflict(
+        session: AsyncSession,
+        user: User,
+        post: Post,
+    ) -> OperationStatus:
+        try:
+            async with session.begin_nested():
+                user.posts.append(post)
+                return OperationStatus.SUCCESS
+        except sqlalchemy.exc.IntegrityError as exc:
+            match exc.orig and exc.orig.__cause__:
+                case UniqueViolationError() as exc:
+                    print(repr(exc))
+                    return OperationStatus.NOT_UNIQUE
+                case _:
+                    raise exc
+
     async def add_post(
         self,
         user_name: str,
         user_age: int,
         post_title: str,
         post_description: str
-    ) -> Status:
+    ) -> OperationStatus:
 
         self.check_session()
-
         async with self._session as session:
             async with session.begin():
                 user = await self._get_user(
                     session, user_name, user_age
                 )
                 if not user:
-                    print(
-                        f"Cannot add a Post '{post_title}', '{post_description}' "
-                        f"to User {user_name} {user_age} "
-                        f"which doesn't exist!"
-                    )
-                    return Status.NOK
+                    return OperationStatus.NOT_EXIST
 
-                user.posts.append(
-                    Post(
-                        title=post_title,
-                        description=post_description,
-                        user_id=user.id
-                    )
-                )
-                return Status.OK
+                post = Post(title=post_title, description=post_description)
+                return await self._add_post_avoid_conflict(session, user, post)
 
     async def add_comment(
         self,
@@ -105,7 +120,7 @@ class DatabaseConnector:
         post_title: str,
         post_description: str,
         comment_title: str
-    ) -> Status:
+    ) -> OperationStatus:
         self.check_session()
 
         async with self._session as session:
@@ -116,21 +131,15 @@ class DatabaseConnector:
                     post_title, post_description
                 )
                 if not post:
-                    print(
-                        f"Cannot add a Comment to Post '{post_title}', '{post_description}' "
-                        f"because this Post doesn't exist OR is NOT related to "
-                        f"the User '{user_name}', {user_age}"
-                    )
-                    return Status.NOK
+                    return OperationStatus.NOT_EXIST
 
                 post.comments.append(
                     Comment(
                         title=comment_title,
-                        post_id=post.id,
-                        user_id=post.user_id
+                        user_id=post.user_id  # required
                     )
                 )
-                return Status.OK
+                return OperationStatus.SUCCESS
 
     async def add_like(
         self,
@@ -138,7 +147,7 @@ class DatabaseConnector:
         user_age: int,
         post_title: str,
         post_description: str,
-    ) -> Status:
+    ) -> OperationStatus:
 
         self.check_session()
 
@@ -150,34 +159,29 @@ class DatabaseConnector:
                     post_title, post_description
                 )
                 if not post:
-                    print(
-                        f"Cannot add a Like to Post '{post_title}', '{post_description}' "
-                        f"because this Post doesn't exist OR is NOT related to "
-                        f"the User '{user_name}', {user_age}"
-                    )
-                    return Status.NOK
+                    return OperationStatus.NOT_EXIST
 
                 post.likes.append(
                     Like(
-                        post_id=post.id,
-                        user_id=post.user_id
+                        user_id=post.user_id  # required
                     )
                 )
-                return Status.OK
-
-    # async def delete_post(self, user_name: str, user_age: int, post_title: str, post_description: str):
-    #     """
-    #     Deletes row from "posts" table
-    #     """
-    #     async with self._session as s:
-    #         async with s.begin():
-    #             query = delete(Post).where(
-    #                 User.name == user_name,
-    #                 User.age == user_age,
-    #                 Post.title == post_title,
-    #                 Post.description == post_description
-    #             )
-    #             return await s.execute(query)
+                return OperationStatus.SUCCESS
 
 
+async def main():
+    conn = DatabaseConnector(config.DB_URL)
+    conn.connect()
+    await conn.check_db()
 
+    result = await conn.add_like(
+        user_name="Alex",
+        user_age=34,
+        post_title="Last Alex post",
+        post_description="I'm added by SqlAlchemy!",
+        # comment_title="Last Alex comment(2)"
+    )
+    print(result)
+
+if __name__ == '__main__':
+    asyncio.run(main())

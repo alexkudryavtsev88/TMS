@@ -13,6 +13,7 @@ class User:
         return asdict(self)
 
 
-class Status(str, Enum):
-    OK = "OK"
-    NOK = "NOK"
+class OperationStatus(str, Enum):
+    SUCCESS = "SUCCESS"
+    NOT_EXIST = "NOT EXIST"
+    NOT_UNIQUE = "NOT UNIQUE"
