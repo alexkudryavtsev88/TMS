@@ -160,8 +160,10 @@ class DatabaseConnector:
         new_post_description: str  # for UPDATE!
     ):
         """
-        To UPDATE the record from DB you need to
-        SELECT this record firstly!
+        To update the record from DB you need to
+        SELECT this record firstly! And this is NOT
+        required to build the query using *update* function
+        - you just need to update the Python Object retrieved by SELECT query!
         """
 
     async def edit_comment(
@@ -185,11 +187,11 @@ class DatabaseConnector:
         post_description: str,
     ):
         """
-        Build query using *delete* function, it's already imported
-        in this module!
         To DELETE the record from the DB it's NOT required to
         SELECT this record before! Just build a correct DELETE query
-        and execute it within the session
+        and execute it within the session:
+        Build query using the *delete* function, it's already imported
+        in this module!
         """
 
     async def delete_comment(
