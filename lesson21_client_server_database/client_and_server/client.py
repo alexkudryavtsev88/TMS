@@ -70,18 +70,51 @@ class Client:
 
     # TODO: Implement methods bellow as Homework
 
-    async def edit_post(self, post_title: str, edit_data: dict[str, str]):
+    async def edit_post(
+        self,
+        user: User,
+        post_title: str,
+        post_description: str,
+        new_post_title: str,
+        new_post_description: str
+    ):
+        """
+        Implement this method the same way as methods above!
+        """""
         pass
 
-    async def edit_comment(self, comment_title: str):
+    async def edit_comment(
+        self,
+        user: User,
+        post_title: str,
+        post_description: str,
+        comment_title: str,
+        new_comment_title: str
+    ):
         pass
 
-    def delete_post(self, post_title: str):
+    async def delete_post(
+        self,
+        user: User,
+        post_title: str,
+        post_description: str,
+    ):
         pass
 
-    def delete_comment(self, comment_title: str):
+    async def delete_comment(
+        self,
+        user: User,
+        post_title: str,
+        post_description: str,
+        comment_title: str
+    ):
         pass
 
-    def delete_like(self, post_title: str):
+    async def delete_like(
+        self,
+        user: User,
+        post_title: str,
+        post_description: str
+    ):
         pass
 
