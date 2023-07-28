@@ -24,10 +24,10 @@ class Client:
 
     def __init__(self, server_url: str):
         self._server_url = yarl.URL(server_url)
-        self._session = aiohttp.ClientSession()
+        self._session = aiohttp.ClientSession  # class, not instance
 
     async def _send_request(self, method: HTTPMethod, url: yarl.URL, data: dict[str, str]):
-        async with self._session as session:
+        async with self._session() as session:
             async with session.request(method, url, json=data) as resp:
                 try:
                     resp_data = await resp.json()

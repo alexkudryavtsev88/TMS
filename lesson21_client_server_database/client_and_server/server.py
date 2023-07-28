@@ -97,7 +97,7 @@ class Server:
         user_age = data["user"]["age"]
         post_title = data["post_title"]
         post_description = data["post_description"]
-        comment_title = data["comment"]
+        comment_title = data["comment_title"]
 
         # async with self._db_connector as db:
         operation_status = await self._db_connector.add_comment(
@@ -113,7 +113,7 @@ class Server:
                 http_status = HTTPStatus.OK
                 message = (
                     f"Comment '{comment_title}' has been successfully added"
-                    f"to Post '{post_title}', '{post_description}'"
+                    f"to Post '{post_title}', '{post_description}' "
                     f"from User {user_name}' (age: {user_age})"
                 )
             case OperationStatus.NOT_EXIST:
@@ -149,7 +149,7 @@ class Server:
                 http_status = HTTPStatus.OK
                 message = (
                     f"Like has been successfully added"
-                    f"to Post '{post_title}', '{post_description}'"
+                    f"to Post '{post_title}', '{post_description}' "
                     f"from User {user_name} (age: {user_age})"
                 )
             case OperationStatus.NOT_EXIST:
