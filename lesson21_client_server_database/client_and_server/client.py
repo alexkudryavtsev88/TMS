@@ -1,3 +1,5 @@
+import traceback
+
 import aiohttp
 import yarl
 from http import HTTPMethod, HTTPStatus
@@ -30,14 +32,11 @@ class Client:
                 try:
                     resp_data = await resp.json()
                 except ValueError as exc:
-                    raise ClientRequestError(
-                        cause_exception=exc
-                    )
+                    traceback.print_exception(exc)
+                    print("Cannot get JSON data from Response!")
                 else:
                     if resp.status != HTTPStatus.OK:
-                        raise ClientRequestError(
-                            context=resp_data
-                        )
+                        print(f"Request ended with non-SUCCESS status-code: {resp.status}")
 
                     return resp_data
 
@@ -69,9 +68,7 @@ class Client:
         }
         return await self._send_request(HTTPMethod.POST, url, data)
 
-    """
-    Methods bellow are not implemented yet
-    """
+    # TODO: Implement methods bellow as Homework
 
     async def edit_post(self, post_title: str, edit_data: dict[str, str]):
         pass

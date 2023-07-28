@@ -8,6 +8,7 @@ from http import HTTPMethod, HTTPStatus
 from lesson21_client_server_database.db.connector import DatabaseConnector
 from lesson21_client_server_database.db.config import DB_URL
 from lesson21_client_server_database.structures import OperationStatus
+from lesson21_client_server_database.client_and_server.config import SERVER_PORT
 
 
 class UnknownOperationStatusError(Exception):
@@ -46,7 +47,6 @@ class Server:
 
     def start(self):
         print(f"Starting the <{self.name}> at port {self._port}")
-        self._db_connector.connect()
         web.run_app(self._app, port=self._port)
 
     async def add_post(self, request: web_request.Request) -> web.Response:
@@ -57,6 +57,7 @@ class Server:
         post_title = data["post_title"]
         post_description = data["post_description"]
 
+        # async with self._db_connector as db:
         operation_status = await self._db_connector.add_post(
             user_name=user_name,
             user_age=user_age,
@@ -98,6 +99,7 @@ class Server:
         post_description = data["post_description"]
         comment_title = data["comment"]
 
+        # async with self._db_connector as db:
         operation_status = await self._db_connector.add_comment(
             user_name=user_name,
             user_age=user_age,
@@ -105,6 +107,7 @@ class Server:
             post_description=post_description,
             comment_title=comment_title
         )
+
         match operation_status:
             case OperationStatus.SUCCESS:
                 http_status = HTTPStatus.OK
@@ -133,6 +136,7 @@ class Server:
         post_title = data["post_title"]
         post_description = data["post_description"]
 
+        # async with self._db_connector as db:
         operation_status = await self._db_connector.add_like(
             user_name=user_name,
             user_age=user_age,
@@ -177,9 +181,7 @@ class Server:
             content_type=self._content_type
         )
 
-    """
-    Methods bellow are not implemented yet
-    """
+    # TODO: Implement methods bellow as Homework
 
     async def edit_post(self, request: web_request.Request):
         pass
@@ -210,4 +212,4 @@ def run_server(port):
 
 
 if __name__ == '__main__':
-    run_server(8000)
+    run_server(port=SERVER_PORT)

@@ -1,15 +1,10 @@
-import asyncio
-from typing import Collection
-
 import sqlalchemy.exc
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from sqlalchemy import select, delete
 from asyncpg.exceptions import UniqueViolationError
 
-from lesson21_client_server_database.db import config
 from lesson21_client_server_database.db.models import User, Post, Comment, Like
 from lesson21_client_server_database.structures import OperationStatus
 
@@ -18,24 +13,9 @@ class DatabaseConnector:
 
     def __init__(self, db_url):
         self._url = db_url
-        self._engine = None
-        self._session = None
-
-    def connect(self):
         self._engine = create_async_engine(self._url, echo=True)
-        self._session = AsyncSession(self._engine)
-
-    def check_session(self):
-        if self._session is None:
-            raise RuntimeError(
-                'Database session is not created,'
-                'please call "connect" method first!'
-            )
-
-    async def check_db(self):
-        self.check_session()
-        async with self._session as s:
-            await s.execute(text("SELECT 1"))
+        # *async_sessionmaker* call returns AsyncSession class object
+        self._session = async_sessionmaker(self._engine)
 
     @staticmethod
     async def _get_user(
@@ -101,8 +81,11 @@ class DatabaseConnector:
         post_description: str
     ) -> OperationStatus:
 
-        self.check_session()
-        async with self._session as session:
+        # here (and in all methods bellow) we use *async with self._session()*
+        # instead of *async with self._session*
+        # because *self._session* stores the reference to
+        # the AsyncSession class, NOT AsyncSession class Instance!
+        async with self._session() as session:
             async with session.begin():
                 user = await self._get_user(
                     session, user_name, user_age
@@ -121,9 +104,8 @@ class DatabaseConnector:
         post_description: str,
         comment_title: str
     ) -> OperationStatus:
-        self.check_session()
 
-        async with self._session as session:
+        async with self._session() as session:
             async with session.begin():
                 post = await self._get_post(
                     session,
@@ -149,9 +131,7 @@ class DatabaseConnector:
         post_description: str,
     ) -> OperationStatus:
 
-        self.check_session()
-
-        async with self._session as session:
+        async with self._session() as session:
             async with session.begin():
                 post = await self._get_post(
                     session,
@@ -168,20 +148,69 @@ class DatabaseConnector:
                 )
                 return OperationStatus.SUCCESS
 
+    # TODO: Implement methods bellow as Homework
 
-# async def main():
-#     conn = DatabaseConnector(config.DB_URL)
-#     conn.connect()
-#     await conn.check_db()
-#
-#     result = await conn.add_like(
-#         user_name="Alex",
-#         user_age=34,
-#         post_title="Last Alex post",
-#         post_description="I'm added by SqlAlchemy!",
-#         # comment_title="Last Alex comment(2)"
-#     )
-#     print(result)
+    async def edit_post(
+        self,
+        user_name: str,            # for Select!
+        user_age: int,             # for Select!
+        post_title: str,           # for Select!
+        post_description: str,     # for Select!
+        new_post_title: str,       # for UPDATE!
+        new_post_description: str  # for UPDATE!
+    ):
+        """
+        To UPDATE the record from DB you need to
+        SELECT this record firstly!
+        """
 
-# if __name__ == '__main__':
-#     asyncio.run(main())
+    async def edit_comment(
+        self,
+        user_name: str,         # for Select!
+        user_age: int,          # for Select!
+        post_title: str,        # for Select!
+        post_description: str,  # for Select!
+        comment_title: str,     # for Select!
+        new_comment_title: str  # for UPDATE!
+    ):
+        """
+        Please read *edit_post* method documentation
+        """
+
+    async def delete_post(
+        self,
+        user_name: str,
+        user_age: int,
+        post_title: str,
+        post_description: str,
+    ):
+        """
+        Build query using *delete* function, it's already imported
+        in this module!
+        To DELETE the record from the DB it's NOT required to
+        SELECT this record before! Just build a correct DELETE query
+        and execute it within the session
+        """
+
+    async def delete_comment(
+        self,
+        user_name: str,
+        user_age: int,
+        post_title: str,
+        post_description: str,
+        comment_title: str
+    ):
+        """
+        Please read *delete_post* method documentation
+        """
+
+    async def delete_like(
+        self,
+        user_name: str,
+        user_age: int,
+        post_title: str,
+        post_description: str,
+    ):
+        """
+        Please read *delete_post* method documentation
+        """
