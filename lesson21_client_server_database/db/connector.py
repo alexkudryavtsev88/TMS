@@ -193,6 +193,19 @@ class DatabaseConnector:
         Build query using the *delete* function, it's already imported
         in this module!
         """
+        async with self._session() as session:
+            async with session.begin():
+                deleted_post = await session.execute(
+                    delete(Post)
+                    .join(User)
+                    .where(
+                        User.name == user_name,
+                        User.age == user_age,
+                        Post.title == post_title,
+                        Post.description == post_description
+                    )
+                )
+                print(deleted_post)
 
     async def delete_comment(
         self,
@@ -205,6 +218,21 @@ class DatabaseConnector:
         """
         Please read *delete_post* method documentation
         """
+        async with self._session() as session:
+            async with session.begin():
+                deleted_comment = await session.execute(
+                    delete(Comment)
+                    .join_from(Comment, User, Comment.user_id == User.id)
+                    .join_from(Comment, Post, Comment.post_id == Post.id)
+                    .where(
+                        User.name == user_name,
+                        User.age == user_age,
+                        Post.title == post_title,
+                        Post.description == post_description,
+                        Comment.title == comment_title
+                    )
+                )
+                print(deleted_comment)
 
     async def delete_like(
         self,
@@ -216,3 +244,17 @@ class DatabaseConnector:
         """
         Please read *delete_post* method documentation
         """
+        async with self._session() as session:
+            async with session.begin():
+                deleted_like = await session.execute(
+                    delete(Like)
+                    .join_from(Like, User, Like.user_id == User.id)
+                    .join_from(Like, Post, Like.post_id == Post.id)
+                    .where(
+                        User.name == user_name,
+                        User.age == user_age,
+                        Post.title == post_title,
+                        Post.description == post_description
+                    )
+                )
+                print(deleted_like)
