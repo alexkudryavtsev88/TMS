@@ -10,12 +10,15 @@ SERVER_URL = f"{SERVER_HOST}:{SERVER_PORT}"
 
 
 async def main():
+    client = Client(server_url=SERVER_URL)
+
     user = User(
         name="Alex",
         age=34,
     )
     post_tile, post_description = f"{user.name} new post", "I love you!"
-    client = Client(server_url=SERVER_URL)
+
+    # ADD
     add_post_result = await client.add_post(user, post_tile, post_description)
     print(add_post_result)
 
@@ -24,6 +27,10 @@ async def main():
 
     add_like_result = await client.add_like(user, post_tile, post_description)
     print(add_like_result)
+
+    # DELETE
+    delete_post_result = await client.delete_post(user, post_tile, post_description)
+    print(delete_post_result)
 
 
 if __name__ == '__main__':

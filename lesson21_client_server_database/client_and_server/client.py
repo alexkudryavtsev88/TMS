@@ -70,6 +70,37 @@ class Client:
 
     # TODO: Implement methods bellow as Homework
 
+    async def delete_post(
+        self,
+        user: User,
+        post_title: str,
+        post_description: str,
+    ):
+        url = self._server_url / "post_delete"
+        data = {
+            "user": user.to_dict(),
+            "post_title": post_title,
+            "post_description": post_description
+        }
+        return await self._send_request(HTTPMethod.DELETE, url, data)
+
+    async def delete_comment(
+        self,
+        user: User,
+        post_title: str,
+        post_description: str,
+        comment_title: str
+    ):
+        pass
+
+    async def delete_like(
+        self,
+        user: User,
+        post_title: str,
+        post_description: str
+    ):
+        pass
+
     async def edit_post(
         self,
         user: User,
@@ -92,29 +123,3 @@ class Client:
         new_comment_title: str
     ):
         pass
-
-    async def delete_post(
-        self,
-        user: User,
-        post_title: str,
-        post_description: str,
-    ):
-        pass
-
-    async def delete_comment(
-        self,
-        user: User,
-        post_title: str,
-        post_description: str,
-        comment_title: str
-    ):
-        pass
-
-    async def delete_like(
-        self,
-        user: User,
-        post_title: str,
-        post_description: str
-    ):
-        pass
-

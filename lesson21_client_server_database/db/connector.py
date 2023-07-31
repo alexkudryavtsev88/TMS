@@ -1,3 +1,5 @@
+import asyncio
+
 import sqlalchemy.exc
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -188,24 +190,31 @@ class DatabaseConnector:
     ):
         """
         To DELETE the record from the DB it's NOT required to
-        SELECT this record before! Just build a correct DELETE query
-        and execute it within the session:
-        Build query using the *delete* function, it's already imported
-        in this module!
+        SELECT this record before, but in common case.
+        In current case we need to SELECT the Post firstly,
+        then DELETE it through the *session.delete()*.
+        This is because when using just *delete().where()* Query there will
+        be a problem:
+        - *delete()* result CAN'T support *join* / *join_from*
+        - when we just specify all our filtering criteria inside *where()*,
+        this works, but there will be a Cartesian product of the appropriate rows,
+        because the filtering is made by rows from 2 several Tables
         """
         async with self._session() as session:
             async with session.begin():
-                deleted_post = await session.execute(
-                    delete(Post)
-                    .join(User)
-                    .where(
-                        User.name == user_name,
-                        User.age == user_age,
-                        Post.title == post_title,
-                        Post.description == post_description
-                    )
-                )
-                print(deleted_post)
+                if (
+                        post := await self._get_post(
+                            session,
+                            user_name,
+                            user_age,
+                            post_title,
+                            post_description
+                        )
+                ):
+                    await session.delete(post)
+                    return OperationStatus.SUCCESS
+
+                return OperationStatus.NOT_EXIST
 
     async def delete_comment(
         self,

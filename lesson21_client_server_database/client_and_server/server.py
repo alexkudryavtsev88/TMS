@@ -26,6 +26,7 @@ class Server:
 
         # app
         self._app = web.Application()
+        # Routes for ADD
         self._app.router.add_route(
             method=HTTPMethod.POST,
             path='/post_add',
@@ -41,6 +42,12 @@ class Server:
             path='/like_add',
             handler=self.add_like,
         )
+        # Routes for DELETE
+        self._app.router.add_route(
+            method=HTTPMethod.DELETE,
+            path='/post_delete',
+            handler=self.delete_post,
+        )
 
         # db
         self._db_connector = DatabaseConnector(db_url=DB_URL)
@@ -48,6 +55,23 @@ class Server:
     def start(self):
         print(f"Starting the <{self.name}> at port {self._port}")
         web.run_app(self._app, port=self._port)
+
+    def _get_response(
+        self,
+        http_status: http.HTTPStatus,
+        op_status: OperationStatus,
+        message: str
+    ) -> web.Response:
+        return web.Response(
+            status=http_status,
+            text=json.dumps(
+                {
+                    "operation_status": op_status.value,
+                    "message": message
+                }
+            ),
+            content_type=self._content_type
+        )
 
     async def add_post(self, request: web_request.Request) -> web.Response:
         data = await request.json()
@@ -57,7 +81,6 @@ class Server:
         post_title = data["post_title"]
         post_description = data["post_description"]
 
-        # async with self._db_connector as db:
         operation_status = await self._db_connector.add_post(
             user_name=user_name,
             user_age=user_age,
@@ -99,7 +122,6 @@ class Server:
         post_description = data["post_description"]
         comment_title = data["comment_title"]
 
-        # async with self._db_connector as db:
         operation_status = await self._db_connector.add_comment(
             user_name=user_name,
             user_age=user_age,
@@ -136,7 +158,6 @@ class Server:
         post_title = data["post_title"]
         post_description = data["post_description"]
 
-        # async with self._db_connector as db:
         operation_status = await self._db_connector.add_like(
             user_name=user_name,
             user_age=user_age,
@@ -164,38 +185,53 @@ class Server:
 
         return self._get_response(http_status, operation_status, message)
 
-    def _get_response(
-        self,
-        http_status: http.HTTPStatus,
-        op_status: OperationStatus,
-        message: str
-    ) -> web.Response:
-        return web.Response(
-            status=http_status,
-            text=json.dumps(
-                {
-                    "operation_status": op_status.value,
-                    "message": message
-                }
-            ),
-            content_type=self._content_type
-        )
-
     # TODO: Implement methods bellow as Homework
 
-    async def edit_post(self, request: web_request.Request):
-        pass
-
-    async def edit_comment(self, request: web_request.Request):
-        pass
-
     async def delete_post(self, request: web_request.Request):
-        pass
+        data = await request.json()
+
+        user_name = data["user"]["name"]
+        user_age = data["user"]["age"]
+        post_title = data["post_title"]
+        post_description = data["post_description"]
+
+        operation_status = await self._db_connector.delete_post(
+            user_name=user_name,
+            user_age=user_age,
+            post_title=post_title,
+            post_description=post_description,
+        )
+        match operation_status:
+            case OperationStatus.SUCCESS:
+                http_status = HTTPStatus.OK
+                message = (
+                    f"Post '{post_title}', '{post_description}' "
+                    f"was successfully deleted from "
+                    f"User {user_name} (age: {user_age})"
+                )
+            case OperationStatus.NOT_EXIST:
+                http_status = HTTPStatus.NOT_FOUND
+                message = (
+                    f"Post '{post_title}', '{post_description}' "
+                    f"was NOT deleted from "
+                    f"User {user_name} (age: {user_age}) "
+                    f"because this Post doesn't exist"
+                )
+            case _:
+                raise UnknownOperationStatusError(f"{operation_status}")
+
+        return self._get_response(http_status, operation_status, message)
 
     async def delete_comment(self, request: web_request.Request):
         pass
 
     async def delete_like(self, request: web_request.Request):
+        pass
+
+    async def edit_post(self, request: web_request.Request):
+        pass
+
+    async def edit_comment(self, request: web_request.Request):
         pass
 
 
