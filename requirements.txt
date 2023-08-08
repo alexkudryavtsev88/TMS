@@ -1,0 +1,9 @@
+requests
+aiohttp
+sqlalchemy
+asyncpg
+pyyaml
+pytest
+pytest-asyncio
+pytest-cov
+pytest-mock
