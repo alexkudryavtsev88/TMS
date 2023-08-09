@@ -5,3 +5,21 @@ django-admin startproject tms_project
 2. Start new application
 
 python manage.py startapp users
+
+3. Create migration file
+
+python manage.py makemigrations
+
+4. Make migration
+
+python manage.py migrate
+
+5. Create super user (admin)
+
+python manage.py createsuperuser
+
+6. Run the application
+
+python manage.py runserver 8000
+
+
