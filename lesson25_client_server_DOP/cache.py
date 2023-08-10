@@ -126,20 +126,20 @@ class AsyncCache:
             # the current Task will be blocked until the lock will be released,
             # then current Task acquires the lock (and this operation returns True)
             # then releases the lock immediately
-            # and then extract the value from Cache by key and return value if it exists
+            # then it extracts the value from Cache by key and returns the value if it exists
             or (await lock.acquire()) and lock.release() is None
         ) and (cached := cls._CACHE.get(cache_key)) is not None:
             logger.debug(f"get data from cache by key: {cache_key}")
             return cached
 
         # here the current Task acquires the lock again to retrieve the data
-        # from the Data source
+        # from the Data Source
         async with lock:
             logger.debug(f"key {cache_key} is NOT in Cache, request for data")
-            # here, when the current Task calls 'await' - the Event Loop
+            # when the current Task calls 'await' - the Event Loop
             # switches the execution to the next Task, and then the next
             # Task will be blocked at line 130 if that next Task will have the SAME lock
-            # as current Task OR the next Task will acquire its private lock and won't be blocked
+            # as current Task, otherwise the next Task will acquire its private lock and won't be blocked
             data = await data_retrieve_method(
                 *args, **kwargs
             )
@@ -180,7 +180,7 @@ async def get_cache_keys_concurrently(
             key = item
 
         tasks.append(
-            cache_obj.get_using_locks_map(
+            cache_obj.get_with_locks_map(
                 key,
                 data_source.get_data,
                 key
