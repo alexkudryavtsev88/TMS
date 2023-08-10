@@ -112,7 +112,15 @@ class Client:
         """
         Implement this method the same way as methods above!
         """""
-        pass
+        url = self._server_url / "post_edit"
+        data = {
+            "user": user.to_dict(),
+            "post_title": post_title,
+            "post_description": post_description,
+            "new_post_title": new_post_title,
+            "new_post_description": new_post_description,
+        }
+        return await self._send_request(HTTPMethod.POST, url, data)
 
     async def edit_comment(
         self,

@@ -1,7 +1,6 @@
+import enum
 import http
 import json
-import multiprocessing
-import time
 
 from aiohttp import web, web_request
 from http import HTTPMethod, HTTPStatus
@@ -9,6 +8,18 @@ from lesson21_client_server_database.db.connector import DatabaseConnector
 from lesson21_client_server_database.db.config import DB_URL
 from lesson21_client_server_database.structures import OperationStatus
 from lesson21_client_server_database.client_and_server.config import SERVER_PORT
+
+
+class Routes(str, enum):
+    POST_ADD = '/post_add'
+    # POST_EDIT = ''
+    POST_DELETE = '/post_delete'
+    COMMENT_ADD = '/comment_add'
+    # COMMENT_EDIT = ''
+    # COMMENT_DELETE = ''
+    LIKE_ADD = '/like_add'
+    # LIKE_EDIT = ''
+    # LIKE_DElETE = ''
 
 
 class UnknownOperationStatusError(Exception):
@@ -29,23 +40,23 @@ class Server:
         # Routes for ADD
         self._app.router.add_route(
             method=HTTPMethod.POST,
-            path='/post_add',
+            path=Routes.POST_ADD,
             handler=self.add_post,
         )
         self._app.router.add_route(
             method=HTTPMethod.POST,
-            path='/comment_add',
+            path=Routes.COMMENT_ADD,
             handler=self.add_comment,
         )
         self._app.router.add_route(
             method=HTTPMethod.POST,
-            path='/like_add',
+            path=Routes.LIKE_ADD,
             handler=self.add_like,
         )
         # Routes for DELETE
         self._app.router.add_route(
             method=HTTPMethod.DELETE,
-            path='/post_delete',
+            path=Routes.POST_DELETE,
             handler=self.delete_post,
         )
 
@@ -229,23 +240,28 @@ class Server:
         pass
 
     async def edit_post(self, request: web_request.Request):
-        pass
+        data = await request.json()
+
+        user_name = data["user"]["name"]
+        user_age = data["user"]["age"]
+        post_title = data["post_title"]
+        post_description = data["post_description"]
+        new_post_title = data["new_post_title"]
+        new_post_description = data["new_post_description"]
+
+        result = await self._db_connector.edit_post(
+            user_name, user_age, post_title,
+            post_description, new_post_title, new_post_description
+        )
 
     async def edit_comment(self, request: web_request.Request):
         pass
 
 
 def run_server(port):
-    def _start_server():
-        server = Server(port=port)
-        server.start()
-
-    proc = multiprocessing.Process(target=_start_server)
-    proc.start()
-    time.sleep(2)
-
-    return proc
+    Server(port=port).start()
 
 
 if __name__ == '__main__':
     run_server(port=SERVER_PORT)
+    print("Hello world")

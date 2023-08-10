@@ -21,19 +21,66 @@ logger = logging.getLogger(__name__)
 
 
 P = ParamSpec('P')
-TMethod = Callable[
-    [P.args, P.kwargs],
-    Coroutine[None, None, Any]
-]
+TMethod = Callable[[P], Coroutine[None, None, Any]]
+
+
+class DataSource:
+
+    def __init__(self):
+        self._ds = {i: f"TEST_{i}" for i in range(101)}
+
+    async def get_data(self, key):
+        sleep_time = 3
+        await asyncio.sleep(sleep_time)
+        logger.debug(f"Get value by key {key} from DATA SOURCE")
+        return self._ds.get(key)
 
 
 class AsyncCache:
     _CACHE = TTLCache(maxsize=10_000, ttl=86_400)
+    _LOCK = asyncio.Lock()
     _LOCKS_MAP = {}
     _LOCKS_MAP_MAX_SIZE = 10_000
 
     @classmethod
-    async def get(
+    async def get_no_lock(
+        cls,
+        cache_key: int | str | tuple[Any, ...],
+        data_retrieve_method: TMethod,
+        *args,
+        **kwargs,
+    ):
+        value = cls._CACHE.get(cache_key)
+        if value is not None:
+            logger.debug(f"Get key {cache_key} from CACHE")
+            return value
+
+        value = await data_retrieve_method(*args, **kwargs)
+        cls._CACHE[cache_key] = value
+
+        return value
+
+    @classmethod
+    async def get_bad_lock(
+        cls,
+        cache_key: int | str | tuple[Any, ...],
+        data_retrieve_method: TMethod,
+        *args,
+        **kwargs,
+    ):
+        async with cls._LOCK:
+            value = cls._CACHE.get(cache_key)
+            if value is not None:
+                logger.debug(f"Get key {cache_key} from CACHE")
+                return value
+
+            value = await data_retrieve_method(*args, **kwargs)
+            cls._CACHE[cache_key] = value
+
+            return value
+
+    @classmethod
+    async def get_using_locks_map(
         cls,
         cache_key: int | str | tuple[Any, ...],
         data_retrieve_method: TMethod,
@@ -47,12 +94,15 @@ class AsyncCache:
         - several Tasks try to get Value from Cache by the SAME Key
         - several Tasks try to get Value from Cache by the DIFFERENT Keys
         """
-        if not (lock := cls._LOCKS_MAP.get(cache_key)):
+        lock = cls._LOCKS_MAP.get(cache_key)
+        if lock is None:
+        # if not (lock := cls._LOCKS_MAP.get(cache_key)):
             lock = asyncio.Lock()
             cls._LOCKS_MAP[cache_key] = lock
 
         if (
-            not lock.locked() or (await lock.acquire()) and lock.release() is None
+            not lock.locked()
+            or (await lock.acquire()) and lock.release() is None
         ) and (cached := cls._CACHE.get(cache_key)) is not None:
             logger.debug(f"get data from cache by key: {cache_key}")
             return cached
@@ -64,7 +114,7 @@ class AsyncCache:
             )
             cls._CACHE[cache_key] = data
 
-        cls._check_locks_limit()
+        # cls._check_locks_limit()
 
         return data
 
@@ -81,21 +131,6 @@ class AsyncCache:
 
 
 # ===== TESTS ===== #
-class DataSource:
-
-    def __init__(self):
-        self._ds = {i: f"TEST_{i}" for i in range(100)}
-
-    async def get_data(self, key):
-        if key == 0:
-            sleep_time = 5
-        else:
-            sleep_time = 3
-
-        await asyncio.sleep(sleep_time)
-        logger.debug(f"Get value by key {key} from DATA SOURCE")
-        return self._ds.get(key)
-
 
 async def get_cache_keys_concurrently(
     cache_obj: Type[AsyncCache],
@@ -114,7 +149,7 @@ async def get_cache_keys_concurrently(
             key = item
 
         tasks.append(
-            cache_obj.get(
+            cache_obj.get_using_locks_map(
                 key,
                 data_source.get_data,
                 key
@@ -133,7 +168,7 @@ async def get_cache_keys_concurrently(
 async def verify_cache_work():
     cache = AsyncCache
     ds = DataSource()
-    await get_cache_keys_concurrently(cache, ds, tasks_count=5, )
+    await get_cache_keys_concurrently(cache, ds, tasks_count=5)
     cache._CACHE.clear()
     await get_cache_keys_concurrently(cache, ds, tasks_count=5, use_same_key=True)
 

@@ -167,6 +167,22 @@ class DatabaseConnector:
         required to build the query using *update* function
         - you just need to update the Python Object retrieved by SELECT query!
         """
+        async with self._session() as session:
+            async with session.begin():
+                post = await self._get_post(
+                    session,
+                    user_name,
+                    user_age,
+                    post_title,
+                    post_description
+                )
+                if not post:
+                    return OperationStatus.NOT_EXIST
+
+                post.title = new_post_title
+                post.description = new_post_description
+
+                return OperationStatus.SUCCESS
 
     async def edit_comment(
         self,
