@@ -43,13 +43,23 @@ class AsyncCache:
     _LOCKS_MAP_MAX_SIZE = 10_000
 
     @classmethod
-    async def get_no_lock(
+    async def get_with_no_lock(
         cls,
         cache_key: int | str | tuple[Any, ...],
         data_retrieve_method: TMethod,
         *args,
         **kwargs,
     ):
+        """
+        This approach doesn't use any Lock at all.
+        This is OK for case when several Tasks try to get
+        value by the DIFFERENT keys (the Cache can not be used
+        in this case at all, because ALL keys are the DIFFERENT),
+        but when the several Tasks try to get value by the SAME key -
+        each Task will go to the Data Source for the Value
+        instead of using Cache (and we have a redundant calls to
+        the Data Source)
+        """
         value = cls._CACHE.get(cache_key)
         if value is not None:
             logger.debug(f"Get key {cache_key} from CACHE")
@@ -61,13 +71,20 @@ class AsyncCache:
         return value
 
     @classmethod
-    async def get_bad_lock(
+    async def get_with_single_lock(
         cls,
         cache_key: int | str | tuple[Any, ...],
         data_retrieve_method: TMethod,
         *args,
         **kwargs,
     ):
+        """
+        This approach uses single Lock, this is good for the case
+        when several Tasks try to get value by the SAME key from Cache, but it's
+        very slow (sequential execution) if the several Tasks try to get
+        value by the DIFFERENT keys (because each call to the Data Source
+        is made under the Lock)
+        """
         async with cls._LOCK:
             value = cls._CACHE.get(cache_key)
             if value is not None:
@@ -80,7 +97,7 @@ class AsyncCache:
             return value
 
     @classmethod
-    async def get_using_locks_map(
+    async def get_with_locks_map(
         cls,
         cache_key: int | str | tuple[Any, ...],
         data_retrieve_method: TMethod,
@@ -88,15 +105,17 @@ class AsyncCache:
         **kwargs,
     ) -> Any:
         """
-        Uses separate Lock for each passed Cache key.
-        This approach provides a correct Cache read/write operations
+        This approach uses separate Lock for each passed Cache key
+        (if the key is unique, of course)
+        This provides a correct Cache read/write operations
         and concurrent non-blocking execution in 2 general use-cases:
         - several Tasks try to get Value from Cache by the SAME Key
         - several Tasks try to get Value from Cache by the DIFFERENT Keys
+
+        NOTE: 'select for update' query in SQL works the similar way
         """
         lock = cls._LOCKS_MAP.get(cache_key)
         if lock is None:
-        # if not (lock := cls._LOCKS_MAP.get(cache_key)):
             lock = asyncio.Lock()
             cls._LOCKS_MAP[cache_key] = lock
 
@@ -114,7 +133,7 @@ class AsyncCache:
             )
             cls._CACHE[cache_key] = data
 
-        # cls._check_locks_limit()
+        cls._check_locks_limit()
 
         return data
 
