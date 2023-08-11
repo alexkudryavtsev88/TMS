@@ -1,4 +1,4 @@
-# import threading
+import threading
 import time
 
 
@@ -10,23 +10,73 @@ class Lock:
 
     def __init__(self):
         self._state = 0
+        self._lock_holders = {}
+
+    def __enter__(self):
+        self.acquire()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.release()
+
+    def locked(self) -> bool:
+        return self._state != 0
 
     def acquire(self):
-        if not self.is_locked():
+        cur_thread = threading.current_thread()
+        if not self.locked():
             self._state += 1
+            self._lock_holders[cur_thread] = self._state
+            print(
+                f"{cur_thread.name} ACQUIRED the Lock! "
+                f"Lock state is {self._state}"
+            )
+            return True
         else:
             self.wait()
 
     def release(self):
+        cur_thread = threading.current_thread()
         self._state -= 1
-
-    def is_locked(self) -> bool:
-        return self._state != 0
+        print(
+            f"{cur_thread.name} RELEASED the Lock! "
+            f"Lock state is {self._state}"
+        )
+        self._lock_holders.pop(cur_thread, None)
 
     def wait(self):
         while True:
-            if self.is_locked():
+            if self.locked():
+                lock_holder = next(
+                    iter(self._lock_holders.keys()),
+                    None
+                )
+                print(
+                    f"{threading.current_thread().name} is WAITING: "
+                    f"Lock is already ACQUIRED by "
+                    f"{lock_holder.name if lock_holder else 'Unknown Thread'}"
+                )
                 time.sleep(0.1)
             else:
-                self._state = 1
-                return
+                self._state += 1
+                print(
+                    f"{threading.current_thread().name} ACQUIRED the Lock! "
+                    f"Lock state is {self._state}"
+                )
+                break
+
+
+lock = Lock()
+
+
+def fn():
+    with lock:
+        time.sleep(3)
+        print("************************")
+        print(f"Hello from {threading.current_thread().name}")
+        print("************************")
+
+
+t1 = threading.Thread(target=fn)
+t2 = threading.Thread(target=fn)
+t1.start()
+t2.start()
