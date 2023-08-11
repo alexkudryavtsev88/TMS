@@ -30,6 +30,10 @@ class DataSource:
         self._ds = {i: f"TEST_{i}" for i in range(101)}
 
     async def get_data(self, key):
+        """
+        asyncio.sleep() is needed to emulate the waiting of the
+        I/O operation
+        """
         sleep_time = 3
         await asyncio.sleep(sleep_time)
         logger.debug(f"Get value by key {key} from DATA SOURCE")
@@ -57,7 +61,7 @@ class AsyncCache:
         in this case at all, because ALL keys are the DIFFERENT),
         but when the several Tasks try to get value by the SAME key -
         each Task will go to the Data Source for the Value
-        instead of using Cache (and we have a redundant calls to
+        instead of using Cache (and we have a redundant requests to
         the Data Source)
         """
         value = cls._CACHE.get(cache_key)
@@ -82,8 +86,8 @@ class AsyncCache:
         This approach uses single Lock, this is good for the case
         when several Tasks try to get value by the SAME key from Cache, but it's
         very slow (sequential execution) if the several Tasks try to get
-        value by the DIFFERENT keys (because each call to the Data Source
-        is made under the Lock)
+        value by the DIFFERENT keys (because each request to the Data Source
+        is made under the Lock, and it is blocking)
         """
         async with cls._LOCK:
             value = cls._CACHE.get(cache_key)
@@ -105,10 +109,10 @@ class AsyncCache:
         **kwargs,
     ) -> Any:
         """
-        This approach uses separate Lock for each passed Cache key
+        This approach uses individual Lock for each passed Cache key
         (if the key is unique, of course)
         This provides a correct Cache read/write operations
-        and concurrent non-blocking execution in 2 general use-cases:
+        and concurrent non-blocking execution in both use-cases:
         - several Tasks try to get Value from Cache by the SAME Key
         - several Tasks try to get Value from Cache by the DIFFERENT Keys
 
@@ -121,24 +125,24 @@ class AsyncCache:
 
         if (
             not lock.locked()
-            # if lock has been already acquired by another Task
+            # bellow, if lock has been already acquired by another Task
             # (this happens when that other Task had the SAME key as current Task),
             # the current Task will be blocked until the lock will be released,
             # then current Task acquires the lock (and this operation returns True)
-            # then releases the lock immediately
-            # then it extracts the value from Cache by key and returns the value if it exists
+            # and releases the lock immediately,
+            # then it extracts the value from Cache by key and returns this value if it exists
             or (await lock.acquire()) and lock.release() is None
         ) and (cached := cls._CACHE.get(cache_key)) is not None:
             logger.debug(f"get data from cache by key: {cache_key}")
             return cached
 
-        # here the current Task acquires the lock again to retrieve the data
-        # from the Data Source
+        # here the current Task acquires the lock again to retrieve a value
+        # from the Data Source if the value wasn't found in Cache at line 135
         async with lock:
             logger.debug(f"key {cache_key} is NOT in Cache, request for data")
-            # when the current Task calls 'await' - the Event Loop
+            # bellow, when the current Task calls 'await' - the Event Loop
             # switches the execution to the next Task, and then the next
-            # Task will be blocked at line 130 if that next Task will have the SAME lock
+            # Task will be blocked at line 134 if that next Task will have the SAME lock
             # as current Task, otherwise the next Task will acquire its private lock and won't be blocked
             data = await data_retrieve_method(
                 *args, **kwargs
