@@ -65,18 +65,16 @@ class Lock:
                 break
 
 
-lock = Lock()
+LOCK = Lock()
 
 
 def fn():
-    with lock:
+    with LOCK:
         time.sleep(3)
         print("************************")
-        print(f"Hello from {threading.current_thread().name}")
+        print(f"Hello from {threading.current_thread().name}!")
         print("************************")
 
 
-t1 = threading.Thread(target=fn)
-t2 = threading.Thread(target=fn)
-t1.start()
-t2.start()
+for i in range(1, 3):
+    threading.Thread(target=fn, name=f"My_Thread-{i}").start()
