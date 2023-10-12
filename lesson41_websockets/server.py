@@ -7,8 +7,11 @@ from aiohttp import WSMsgType
 from aiohttp import web, web_request
 
 logging.basicConfig(
+    format="%(asctime)s.%(msecs)03d %(levelname)s "
+    "[%(name)s:%(funcName)s:%(lineno)s][%(threadName)s] -> %(message)s",
+    datefmt="%Y-%m-%d,%H:%M:%S",
     stream=sys.stdout,
-    level=logging.DEBUG
+    level=logging.DEBUG,
 )
 logger = logging.getLogger(__name__)
 
@@ -29,7 +32,7 @@ class SimpleServer:
         )
 
     def start(self):
-        print(f"Starting the <{self.name}> at port {self._port}")
+        logger.info(f"Starting the <{self.name}> at port {self._port}")
         web.run_app(self._app, port=self._port)
 
     @staticmethod
@@ -77,15 +80,15 @@ class WebSocketServer(SimpleServer):
         logger.info('Websocket connection ready')
 
         async for msg in ws:
-            logger.debug(msg)
+            logger.debug(f"Message received: {msg}")
 
             if msg.type == WSMsgType.TEXT:
-                logger.debug("Message data: {msg.data}")
+                logger.debug(f"Message data: {msg.data}")
 
                 if msg.data == 'close':
                     await ws.close()
                 else:
-                    await ws.send_str(msg.data + '/answer')
+                    await ws.send_str(f'Answer to {msg.data}')
 
         print('Websocket connection closed')
         return ws
@@ -105,5 +108,5 @@ def main(server_name):
 
 
 if __name__ == '__main__':
-    serv_name = input("Enter the Server name: ")
+    serv_name = WebSocketServer.__name__
     main(serv_name)

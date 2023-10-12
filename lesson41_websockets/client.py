@@ -1,6 +1,5 @@
 import aiohttp
 import asyncio
-import os
 
 
 _SERVER_URL = "http://0.0.0.0:8002"
