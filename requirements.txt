@@ -7,3 +7,6 @@ pytest
 pytest-asyncio
 pytest-cov
 pytest-mock
+google-cloud>=0.34.0
+protobuf>=4.24.2
+google-cloud-pubsub=>2.18.3

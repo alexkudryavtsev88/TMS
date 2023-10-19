@@ -24,6 +24,9 @@ pytest-asyncio = "*"
 pytest-cov = "*"
 pytest-mock = "^3.10.0"
 pyright = "*"
+google-cloud = "^0.34.0"
+protobuf = "^4.24.2"
+google-cloud-pubsub = "^2.18.3"
 
 
 
