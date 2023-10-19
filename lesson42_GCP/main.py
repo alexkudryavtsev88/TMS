@@ -1,3 +1,5 @@
+import logging
+import sys
 import threading
 import time
 
@@ -5,6 +7,16 @@ from lesson42_GCP.config import Config
 from lesson42_GCP.data_generator import DataGenerator
 from lesson42_GCP.subscriber import Subscriber
 from lesson42_GCP.processor import Processor
+
+
+logging.basicConfig(
+    format="%(asctime)s.%(msecs)03d %(levelname)s "
+    "[%(name)s:%(funcName)s:%(lineno)s][%(threadName)s] -> %(message)s",
+    datefmt="%Y-%m-%d,%H:%M:%S",
+    stream=sys.stdout,
+    level=logging.DEBUG,
+)
+logger = logging.getLogger(__name__)
 
 
 _CONFIG = Config(
