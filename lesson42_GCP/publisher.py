@@ -13,7 +13,6 @@ class Publisher:
         self._project_id = google_cloud_project
         self._pubsub = PublisherClient()
         self._publish_timeout = publish_timeout
-        self._logger = logger
 
     @staticmethod
     def _publish_callback(future_: Future, timeout: int) -> Callable[[Future], None]:
@@ -47,7 +46,7 @@ class Publisher:
         futures_lib.wait(
             publish_futures, return_when=futures_lib.ALL_COMPLETED, timeout=timeout + 5
         )
-        self._logger.debug(f"{len(publish_futures)} messages published OK to '{topic}'")
+        logger.debug(f"{len(publish_futures)} messages published OK to '{topic}'")
 
     def stop(self):
         self._pubsub.stop()
