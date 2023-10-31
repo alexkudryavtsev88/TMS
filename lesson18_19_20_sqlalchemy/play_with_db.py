@@ -153,9 +153,9 @@ if __name__ == '__main__':
     database_worker.connect()
 
     ''' update User nationality '''
-    # asyncio.run(
-    #     update_user_nationality_and_check_updates(database_worker, user_id=1)
-    # )
+    asyncio.run(
+        update_user_nationality_and_check_updates(database_worker, user_id=1)
+    )
 
     ''' add new User post '''
     # asyncio.run(
