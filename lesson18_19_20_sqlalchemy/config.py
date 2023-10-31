@@ -1,6 +1,6 @@
 db_user = "admin"
 db_pass = "cp12345"
-db_host = "127.0.0.1"
+db_host = "127.0.0.1"  # 0.0.0.0  # localhost
 db_port = 5432
 db_name = "tms"
 

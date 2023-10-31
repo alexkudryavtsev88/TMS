@@ -50,15 +50,15 @@ class DatabaseWorker:
             result = (await s.execute(query)).unique()
 
             if scalars and not one_result:
-                return result.scalars().all()
+                return result.scalars().all()  # type: list[User]
 
             if one_result:
                 return result.scalar_one_or_none()
 
-            return result.all()
+            return result.all()  # type: list[tuple[str, int]]
 
     @staticmethod
-    async def _get_user_by_id_from_session(session: AsyncSession, user_id: int):
+    async def _get_user_by_id_from_session(session: AsyncSession, user_id: int) -> User | None:
         """
         This method builds query, executes it through *session* which it got as argument
         and returns result as single User object or None if there is no such id in the

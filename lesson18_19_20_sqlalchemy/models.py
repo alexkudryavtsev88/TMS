@@ -14,10 +14,10 @@ class User(Base):
     nationality = Column(String, nullable=True)
     posts = relationship(
         "Post",
+        lazy="joined",  # used for automatic join 'users' and 'posts' tables
+        innerjoin=True,
         backref="user",
         passive_deletes=True,
-        lazy="joined",  # used for automatic join 'users' and 'posts' tables
-        innerjoin=True
     )
     comments = relationship("Comment", backref="user", passive_deletes=True)
     likes = relationship("Like", backref="user", passive_deletes=True)
