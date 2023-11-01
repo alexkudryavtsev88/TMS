@@ -1,5 +1,5 @@
 from sqlalchemy import select
-from sqlalchemy.orm.strategy_options import joinedload
+from sqlalchemy.orm import joinedload
 
 from lesson18_19_20_sqlalchemy.models import Comment, Post, User
 
@@ -169,12 +169,13 @@ don't work in this case!
 To avoid this and get your result as you expect you should use the "JoinedLoad" technique:
 """
 
-# select_user_with_comments = (
-#     select(User).options(
-#         joinedload(User.comments, innerjoin="unnested")
-#     ).where(User.id == 1)
-# )
+select_user_with_comments = (
+    select(User).options(
+        joinedload(User.comments, innerjoin=True)
+    ).where(User.id == 1)
+)
 
+# x = joinedload(User.comments, innerjoin=True)
 """
 OR you can add *lazy='joined'* in the appropriate *relationship* field of User class
 and NOT use *options(joinedload(...)) directly in query 
