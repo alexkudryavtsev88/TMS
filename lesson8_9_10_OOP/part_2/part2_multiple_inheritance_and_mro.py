@@ -13,11 +13,22 @@ class Parent1:
         print(Parent1.__name__)
 
 
+print(Parent1.mro())
+
+
 class Parent2:
 
     param = "Parent2 param"
 
     def get_parent2_name(self):
+        print(Parent2.__name__)
+
+
+class Parent3:
+
+    param = "Parent3 param"
+
+    def get_parent3_name(self):
         print(Parent2.__name__)
 
 
@@ -29,6 +40,18 @@ class Child(Parent1, Parent2):  # Child is INHERITED from Parent1 and Parent2
         self.param = "Child Instance param"
 
 
+c = Child()
+print(c.param)
+
+
+class Child2(Child, Parent2, Parent3):  # Child is INHERITED from Parent1 and Parent2
+
+    param = "Child param"
+
+    # def __init__(self):
+    #     self.param = "Child Instance param"
+
+
 child = Child()
 child.get_parent1_name()  # Call the Parent1 related method from Child Instance
 child.get_parent2_name()  # Call the Parent2 related method from Child Instance
@@ -37,7 +60,7 @@ child.get_parent2_name()  # Call the Parent2 related method from Child Instance
 print("*" * 100)
 
 """
- The MRO (Methods Order Resolution)
+ The MRO (Methods Resolution Order)
 """
 mro = child.__class__.mro()
 print(mro)  # print list where 1st element is the Child Class,
