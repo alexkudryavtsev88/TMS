@@ -15,10 +15,10 @@ def add_value(val):
     logger.debug(f'adding value {repr(val)}')
 
     QUEUE.append(val)
-    MULTIPROCESS_QUEUE.put(val)
+    # MULTIPROCESS_QUEUE.put(val)
 
     logger.debug(f"QUEUE size after the value {repr(val)} was added: {len(QUEUE)}")
-    logger.debug(f"MULTIPROCESS_QUEUE size after the value {repr(val)} was added: {MULTIPROCESS_QUEUE.qsize()}")
+    # logger.debug(f"MULTIPROCESS_QUEUE size after the value {repr(val)} was added: {MULTIPROCESS_QUEUE.qsize()}")
 
 
 def get_value():
@@ -33,20 +33,20 @@ def get_value():
         logger.warning(f"Value from QUEUE: {repr(val_from_q1)}")
     except Exception as exc:
         logger.error(f'Error is occurred! {exc}')
-
-    try:
-        val_from_q2 = MULTIPROCESS_QUEUE.get()  # but here all is OK, because multiprocessing Queue
-        # serializes the data automatically, and separate Processes may see the serialized data
-        logger.warning(f"Value from MULTIPROCESS_QUEUE: {repr(val_from_q2)}")
-    except Exception as exc:
-        logger.error(f'Error is occurred! {exc}')
+    #
+    # try:
+    #     val_from_q2 = MULTIPROCESS_QUEUE.get()  # but here all is OK, because multiprocessing Queue
+    #     # serializes the data automatically, and separate Processes may see the serialized data
+    #     logger.warning(f"Value from MULTIPROCESS_QUEUE: {repr(val_from_q2)}")
+    # except Exception as exc:
+    #     logger.error(f'Error is occurred! {exc}')
 
 
 def run_concurrently():
     logger.info('start')
 
     logger.info(f"QUEUE size BEFORE the Processes have started: {len(QUEUE)}")
-    logger.info(f"MULTIPROCESS_QUEUE size BEFORE the Processes have started: {MULTIPROCESS_QUEUE.qsize()}")
+    # logger.info(f"MULTIPROCESS_QUEUE size BEFORE the Processes have started: {MULTIPROCESS_QUEUE.qsize()}")
 
     p1 = mp.Process(target=add_value, args=('test',))
     p2 = mp.Process(target=get_value)
@@ -58,7 +58,14 @@ def run_concurrently():
         p.join()
 
     logger.info(f"QUEUE size AFTER the Processes have ended: {len(QUEUE)}")
-    logger.info(f"MULTIPROCESS_QUEUE size AFTER the Processes have ended: {MULTIPROCESS_QUEUE.qsize()}")
+    # logger.info(f"MULTIPROCESS_QUEUE size AFTER the Processes have ended: {MULTIPROCESS_QUEUE.qsize()}")
 
 
-run_concurrently()
+# Instruction bellow is required for MacOS
+# because the Processes are SPAWNed (not FORKed)
+# in MacOS
+if __name__ == '__main__':
+    run_concurrently()
+
+
+
