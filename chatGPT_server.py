@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import sys
@@ -5,11 +6,13 @@ from http import HTTPMethod, HTTPStatus
 
 import aiohttp
 from aiohttp import web, web_request
+from aiohttp.web_exceptions import HTTPException
 
 logging.basicConfig(
     stream=sys.stdout,
     level=logging.DEBUG
 )
+logger = logging.getLogger(__name__)
 
 
 class Server:
@@ -22,9 +25,7 @@ class Server:
         self._chat_gpt_api_key = os.environ["CHAT_GPT_API_KEY"]
         self._content_type = 'application/json'
 
-        # app
         self._app = web.Application()
-        # Routes for ADD
         self._app.router.add_route(
             method=HTTPMethod.GET,
             path="/ask_chat_gpt",
@@ -34,23 +35,6 @@ class Server:
     def start(self):
         print(f"Starting the <{self._name}> at {self._host}:{self._port}")
         web.run_app(self._app, port=self._port)
-
-    def _get_response(
-        self,
-        http_status: HTTPStatus,
-        op_status: OperationStatus,
-        message: str
-    ) -> web.Response:
-        return web.Response(
-            status=http_status,
-            text=json.dumps(
-                {
-                    "operation_status": op_status.value,
-                    "message": message
-                }
-            ),
-            content_type=self._content_type
-        )
 
     async def ask_chat_gpt(self, request: web_request.Request) -> web.Response:
         request_data = await request.json()
@@ -66,13 +50,22 @@ class Server:
                 text=f"'questions' parameter has invalid type: {type(questions)}"
             )
 
+        answers = await self._request_chat_gpt(questions=questions)
+
+        return web.Response(status=HTTPStatus.OK, text=json.dumps(answers))
+
+    async def _request_chat_gpt(self, questions: list[str] | tuple[str, ...]) -> dict[str, str] | None:
+        params = {"api_key": self._chat_gpt_api_key, "questions": questions}
         try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(self._chat_gpt_api_url, params=params) as resp:
+                    try:
+                        return await resp.json()
+                    except ValueError as exc:
+                        logger.error(f"Cannot deserialize ChatGPT response: {str(exc)}")
+                        return None
+        except HTTPException as exc:
+            logger.error(f"Communication with ChatGPT API was failed cause of: {str(exc)}")
 
-
-        return web.Response(status=HTTPStatus.OK, text="")
-
-    async def _request_chat_gpt(self, data):
-        async with aiohttp.ClientSession() as session:
-            async with session.get(self._chat_gpt_api_url, json=data):
 
 
