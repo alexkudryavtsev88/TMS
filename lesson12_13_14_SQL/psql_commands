@@ -1,6 +1,22 @@
+MacOS:
+
+install:
+  brew install postgresql
+  pg_ctl -D /usr/local/var/postgres start && brew services start postgresql
+  postgres -V
+
 Connect:
+ psql postgres
+
+----------------------------
+
+Connect (Linux):
 
 sudo -i -u postgres
+
+----------------------------
+
+Psql CLI:
 
 1. list databases:
 
