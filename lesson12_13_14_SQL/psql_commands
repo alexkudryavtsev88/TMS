@@ -6,7 +6,7 @@ install:
   postgres -V
 
 Connect:
- psql postgres
+  psql postgres
 
 ----------------------------
 
