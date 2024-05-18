@@ -28,4 +28,12 @@ sudo -i -u postgres
  
 7. create new DB: 
 
-  CREATE DATABASE db_name
+  CREATE DATABASE db_name;
+
+8. grant access to db for user
+
+  \c db_name
+  GRANT ALL ON DATABASE db_name TO user_name;
+  GRANT ALL ON SCHEMA public TO user_name;
+  GRANT ALL ON SCHEMA public TO public;
+
